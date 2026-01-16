@@ -66,11 +66,11 @@ export async function fetchSessions(userId: string): Promise<SessionSummary[]> {
 
   const data = await response.json()
 
-  const rawSessions = Array.isArray(data.sessions) ? data.sessions : []
+  const rawSessions = Array.isArray(data.sessions) ? (data.sessions as Array<{ id?: unknown; title?: unknown; createdAt?: unknown }>) : []
 
-  return rawSessions.map((s, index) => ({
-    id: String(s.id ?? index),
-    title: String(s.title ?? `Sessão ${index + 1}`),
-    createdAt: s.createdAt ? String(s.createdAt) : undefined,
+  return rawSessions.map((session, index) => ({
+    id: String(session.id ?? index),
+    title: String(session.title ?? `Sessão ${index + 1}`),
+    createdAt: session.createdAt ? String(session.createdAt) : undefined,
   }))
 }

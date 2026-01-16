@@ -14,3 +14,4 @@ ReactDOM.createRoot(document.getElementById('app') as HTMLElement).render(
     </HashRouter>
   </React.StrictMode>,
 )
+

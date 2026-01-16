@@ -1,8 +1,10 @@
-import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
+import type { FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Hash, Loader2, LogOut, MessageSquareMore, Plus, Send } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import { useAuth } from '../auth'
-import { ChatMessage, fetchSessions, sendConsultoriaMessage, SessionSummary } from '../api'
+import type { ChatMessage, SessionSummary } from '../api'
+import { fetchSessions, sendConsultoriaMessage } from '../api'
 
 type SessionState = {
   id: string | null
@@ -308,4 +310,3 @@ export function Chat() {
     </div>
   )
 }
-
