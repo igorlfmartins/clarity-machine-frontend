@@ -61,8 +61,7 @@ export function Chat() {
     setError(null)
   }
 
-  async function handleSubmit(event: FormEvent) {
-    event.preventDefault()
+  async function sendMessage() {
     if (!userId || !canSend) return
 
     const text = input.trim()
@@ -106,6 +105,18 @@ export function Chat() {
       setError('Não foi possível obter a resposta do consultor. Tente novamente em instantes.')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault()
+    await sendMessage()
+  }
+
+  function handleKeyDown(event: React.KeyboardEvent) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault()
+      sendMessage()
     }
   }
 
@@ -288,6 +299,7 @@ export function Chat() {
                     placeholder="Formule sua pergunta de negócio de forma objetiva. Ex: 'Quais alavancas posso usar para aumentar margens em 20% nos próximos 12 meses?'"
                     value={input}
                     onChange={(event) => setInput(event.target.value)}
+                    onKeyDown={handleKeyDown}
                   />
                 </div>
                 <button
