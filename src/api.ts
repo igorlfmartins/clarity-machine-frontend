@@ -23,7 +23,8 @@ export async function sendConsultoriaMessage(params: {
   userId: string
   conversationId: string | null
   message: string
-  history?: ChatMessage[] // Adicionado histórico
+  history?: ChatMessage[]
+  selectedAgents?: string[]
 }): Promise<ChatResponse> {
   // Converte histórico para o formato do Gemini (se necessário pelo backend)
   // O backend espera { message, history: [{ role: 'user'|'model', parts: [{ text: '...' }] }] }
@@ -41,6 +42,7 @@ export async function sendConsultoriaMessage(params: {
     body: JSON.stringify({
       message: params.message,
       history: formattedHistory,
+      selectedAgents: params.selectedAgents,
     }),
   })
 
