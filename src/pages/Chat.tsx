@@ -4,7 +4,60 @@ import { Hash, Loader2, LogOut, MessageSquareMore, Plus, Send } from 'lucide-rea
 import ReactMarkdown from 'react-markdown'
 import { useAuth } from '../auth'
 import type { ChatMessage, SessionSummary } from '../api'
-import { fetchSessions, sendConsultoriaMessage } from '../api'
+import { sendConsultoriaMessage } from '../api'
+
+const SESSIONS_KEY_PREFIX = 'consultoria_sessions_'
+const SESSION_MESSAGES_KEY_PREFIX = 'consultoria_session_messages_'
+
+function getSessionsKey(userId: string) {
+  return `${SESSIONS_KEY_PREFIX}${userId}`
+}
+
+function getMessagesKey(userId: string, sessionId: string) {
+  return `${SESSION_MESSAGES_KEY_PREFIX}${userId}_${sessionId}`
+}
+
+function loadSessionsFromStorage(userId: string): SessionSummary[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const raw = window.localStorage.getItem(getSessionsKey(userId))
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    return parsed
+  } catch {
+    return []
+  }
+}
+
+function saveSessionsToStorage(userId: string, sessions: SessionSummary[]) {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(getSessionsKey(userId), JSON.stringify(sessions))
+  } catch {
+  }
+}
+
+function loadMessagesFromStorage(userId: string, sessionId: string): ChatMessage[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const raw = window.localStorage.getItem(getMessagesKey(userId, sessionId))
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    return parsed
+  } catch {
+    return []
+  }
+}
+
+function saveMessagesToStorage(userId: string, sessionId: string, messages: ChatMessage[]) {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(getMessagesKey(userId, sessionId), JSON.stringify(messages))
+  } catch {
+  }
+}
 
 type SessionState = {
   id: string | null
@@ -30,10 +83,9 @@ export function Chat() {
     if (!userId) return
     setIsLoadingSessions(true)
 
-    fetchSessions(userId)
-      .then((list) => setSessions(list))
-      .catch(() => setSessions([]))
-      .finally(() => setIsLoadingSessions(false))
+    const stored = loadSessionsFromStorage(userId)
+    setSessions(stored)
+    setIsLoadingSessions(false)
   }, [userId])
 
   useEffect(() => {
@@ -53,10 +105,12 @@ export function Chat() {
   }
 
   function handleSelectSession(session: SessionSummary) {
+    if (!userId) return
+    const messages = loadMessagesFromStorage(userId, session.id)
     setCurrentSession({
       id: session.id,
       title: session.title,
-      messages: [],
+      messages,
     })
     setError(null)
   }
@@ -97,11 +151,50 @@ export function Chat() {
         createdAt: new Date().toISOString(),
       }
 
+      const conversationId = result.conversationId
+      const baseMessages = [...currentSession.messages, userMessage]
+      const fullMessages = [...baseMessages, aiMessage]
+
       setCurrentSession((prev) => ({
         ...prev,
-        id: result.conversationId,
-        messages: [...prev.messages, aiMessage],
+        id: conversationId,
+        messages: fullMessages,
       }))
+
+      if (userId) {
+        let createdAt = now
+        let title = currentSession.title
+        const existing = sessions.find((s) => s.id === conversationId)
+        if (existing) {
+          createdAt = existing.createdAt ?? createdAt
+          title = existing.title || title
+        } else {
+          if (!title || title === 'Nova sessão de consultoria') {
+            title = text.length > 60 ? `${text.slice(0, 57)}...` : text
+          }
+        }
+
+        const summary: SessionSummary = {
+          id: conversationId,
+          title: title || 'Sessão de consultoria',
+          createdAt,
+        }
+
+        setSessions((prev) => {
+          const index = prev.findIndex((s) => s.id === conversationId)
+          if (index === -1) {
+            const next = [summary, ...prev]
+            saveSessionsToStorage(userId, next)
+            return next
+          }
+          const next = [...prev]
+          next[index] = summary
+          saveSessionsToStorage(userId, next)
+          return next
+        })
+
+        saveMessagesToStorage(userId, conversationId, fullMessages)
+      }
     } catch (err) {
       setError('Não foi possível obter a resposta do consultor. Tente novamente em instantes.')
     } finally {
