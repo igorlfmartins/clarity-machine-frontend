@@ -1,0 +1,78 @@
+{
+  "chat": {
+    "sidebar": {
+      "header": "Consultoría",
+      "subHeader": "Panel Estratégico",
+      "newSessionButton": "Nueva Sesión de Consultoría",
+      "history": "Historial de sesiones",
+      "emptyHistory": "Las sesiones anteriores aparecerán aquí.",
+      "deleteConversation": "Eliminar conversación",
+      "confirmDelete": "¿Estás seguro de que quieres eliminar esta conversación?",
+      "userAccessLevel": "Acceso Corporativo",
+      "logout": "Cerrar Sesión"
+    },
+    "header": {
+      "title": "Consultoría Estratégica",
+      "subtitle": "Mentoría de negocios en tiempo real, impulsada por datos y benchmarks del mercado.",
+      "aiStatus": "Consultor IA Activo",
+      "aiModel": "Línea Estratégica",
+      "settings": "Configuración"
+    },
+    "body": {
+      "initialBriefing": {
+        "title": "Briefing Inicial",
+        "heading": "Estructure su sesión de consultoría de negocios",
+        "paragraph": "Describa brevemente el contexto de su empresa, el objetivo de la consultoría y el horizonte de tiempo. La IA estructurará un análisis centrado en la priorización, los riesgos y las oportunidades.",
+        "example1": "Ej: \"Soy el CEO de una SaaS B2B en etapa inicial en Brasil\"",
+        "example2": "Ej: \"Quiero aumentar los ingresos recurrentes en 12 meses\"",
+        "example3": "Ej: \"Quiero evaluar la expansión a nuevos segmentos o países\""
+      },
+      "aiMessage": {
+        "senderName": "Consultor Estratégico",
+        "deepDive": "Profundizar análisis en:"
+      },
+      "loading": "Analizando contexto, escenarios e implicaciones estratégicas...",
+      "error": "No se pudo obtener la respuesta del consultor. Por favor, inténtelo de nuevo en unos momentos."
+    },
+    "footer": {
+      "focusGeneral": "Foco de la Sesión: General",
+      "generateReport": "Generar Informe Estratégico",
+      "inputPlaceholder": "Escriba su mensaje o describa el desafío de su negocio..."
+    },
+    "session": {
+      "new": "Nueva sesión de consultoría",
+      "defaultTitle": "Sesión de consultoría"
+    },
+    "focusAreas": {
+      "sales": "Ventas",
+      "marketing": "Marketing y Branding",
+      "finance": "Finanzas y Legal",
+      "management": "Gestión y Estrategia",
+      "tech": "Tecnología e Innovación"
+    }
+  },
+  "settings": {
+    "title": "Configuración",
+    "subtitle": "Gestiona la configuración de la interfaz y de la sesión.",
+    "language": {
+      "label": "Idioma",
+      "description": "Establece el idioma de la interfaz y de las respuestas de la IA."
+    },
+    "theme": {
+      "label": "Apariencia",
+      "description": "Personaliza la apariencia de la interfaz.",
+      "light": "Claro",
+      "dark": "Oscuro"
+    },
+    "tone": {
+      "label": "Nivel de Franqueza del Consultor",
+      "description": "Ajusta el nivel de franqueza y profundidad del consultor de IA.",
+      "level1": "Nivel 1: Coach Empático",
+      "level1_desc": "Respuestas más amables y motivadoras, centradas en generar confianza y guiar de forma positiva.",
+      "level2": "Nivel 2: Socio Socrático",
+      "level2_desc": "Respuestas que desafían suposiciones con preguntas, fomentando la reflexión profunda y el descubrimiento autónomo.",
+      "level3": "Nivel 3: Auditor Brutal",
+      "level3_desc": "Respuestas directas, sin rodeos y basadas en datos, centradas en la eficiencia y la verdad sin adornos."
+    }
+  }
+}

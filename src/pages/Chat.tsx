@@ -2,16 +2,17 @@ import type { FormEvent, KeyboardEvent } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Hash, Loader2, LogOut, MessageSquareMore, Plus, Send, Trash2, Target, ArrowRight, FileText, Settings, X, CreditCard, Moon, Sun, Globe, Zap } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../auth'
 import type { ChatMessage, SessionSummary } from '../api'
 import { sendConsultoriaMessage } from '../api'
 
-const FOCUS_AREAS = [
-  { id: 'vendas', label: 'Vendas', color: 'text-emerald-400', border: 'border-emerald-500/50', bg: 'bg-emerald-500/10' },
-  { id: 'marketing', label: 'Marketing e Branding', color: 'text-purple-400', border: 'border-purple-500/50', bg: 'bg-purple-500/10' },
-  { id: 'financas', label: 'Finanças e Jurídico', color: 'text-amber-400', border: 'border-amber-500/50', bg: 'bg-amber-500/10' },
-  { id: 'gestao', label: 'Gestão e Estratégia', color: 'text-blue-400', border: 'border-blue-500/50', bg: 'bg-blue-500/10' },
-  { id: 'tecnologia', label: 'Tecnologia e Inovação', color: 'text-indigo-400', border: 'border-indigo-500/50', bg: 'bg-indigo-500/10' },
+const FOCUS_AREAS = (t: (key: string) => string) => [
+  { id: 'vendas', label: t('chat.focusAreas.sales'), color: 'text-emerald-400', border: 'border-emerald-500/50', bg: 'bg-emerald-500/10' },
+  { id: 'marketing', label: t('chat.focusAreas.marketing'), color: 'text-purple-400', border: 'border-purple-500/50', bg: 'bg-purple-500/10' },
+  { id: 'financas', label: t('chat.focusAreas.finance'), color: 'text-amber-400', border: 'border-amber-500/50', bg: 'bg-amber-500/10' },
+  { id: 'gestao', label: t('chat.focusAreas.management'), color: 'text-blue-400', border: 'border-blue-500/50', bg: 'bg-blue-500/10' },
+  { id: 'tecnologia', label: t('chat.focusAreas.tech'), color: 'text-indigo-400', border: 'border-indigo-500/50', bg: 'bg-indigo-500/10' },
 ]
 
 const SESSIONS_KEY_PREFIX = 'consultoria_sessions_'
@@ -74,11 +75,12 @@ type SessionState = {
 }
 
 export function Chat() {
+  const { t, i18n } = useTranslation()
   const { userId, signOut } = useAuth()
   const [sessions, setSessions] = useState<SessionSummary[]>([])
   const [currentSession, setCurrentSession] = useState<SessionState>({
     id: null,
-    title: 'Nova sessão de consultoria',
+    title: t('chat.session.new'),
     messages: [],
   })
   const [input, setInput] = useState('')
@@ -89,12 +91,14 @@ export function Chat() {
   
   // Settings State
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [language, setLanguage] = useState('en')
+  const [language, setLanguage] = useState(i18n.language)
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   const [toneLevel, setToneLevel] = useState(3)
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
+
+  const focusAreas = useMemo(() => FOCUS_AREAS(t), [t])
 
   // Load settings
   useEffect(() => {
@@ -117,7 +121,8 @@ export function Chat() {
   // Save language
   useEffect(() => {
     localStorage.setItem('consultoria_language', language)
-  }, [language])
+    i18n.changeLanguage(language)
+  }, [language, i18n])
 
   // Save tone
   useEffect(() => {
@@ -154,7 +159,7 @@ export function Chat() {
   function handleNewSession() {
     setCurrentSession({
       id: null,
-      title: 'Nova sessão de consultoria',
+      title: t('chat.session.new'),
       messages: [],
     })
     setError(null)
@@ -175,7 +180,7 @@ export function Chat() {
     event.stopPropagation()
     if (!userId) return
 
-    if (!window.confirm('Tem certeza que deseja excluir esta conversa?')) return
+    if (!window.confirm(t('chat.sidebar.confirmDelete'))) return
 
     const nextSessions = sessions.filter((s) => s.id !== sessionId)
     setSessions(nextSessions)
@@ -249,14 +254,14 @@ export function Chat() {
           createdAt = existing.createdAt ?? createdAt
           title = existing.title || title
         } else {
-          if (!title || title === 'Nova sessão de consultoria') {
+          if (!title || title === t('chat.session.new')) {
             title = text.length > 60 ? `${text.slice(0, 57)}...` : text
           }
         }
 
         const summary: SessionSummary = {
           id: conversationId,
-          title: title || 'Sessão de consultoria',
+          title: title || t('chat.session.defaultTitle'),
           createdAt,
         }
 
@@ -276,7 +281,7 @@ export function Chat() {
         saveMessagesToStorage(userId, conversationId, fullMessages)
       }
     } catch (err) {
-      setError('Não foi possível obter a resposta do consultor. Tente novamente em instantes.')
+      setError(t('chat.body.error'))
     } finally {
       setIsLoading(false)
     }
@@ -287,12 +292,12 @@ export function Chat() {
     await sendMessage()
   }
 
-  function handleDeepDive(area: typeof FOCUS_AREAS[0]) {
-    sendMessage(`Gostaria de um aprofundamento específico na área de ${area.label}, complementando a resposta anterior.`, area.label)
+  function handleDeepDive(area: { id: string; label: string }) {
+    sendMessage(t('chat.body.aiMessage.deepDive') + ` ${area.label}`, area.label)
   }
 
   function handleGenerateReport() {
-    sendMessage("Com base na nossa conversa, gere agora o Relatório Estratégico Completo (Diagnóstico + Plano 30/60/90 + Riscos + Primeiro Passo).")
+    sendMessage(t('chat.footer.generateReport'))
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
@@ -308,8 +313,8 @@ export function Chat() {
         <div className="px-5 pt-5 pb-4 border-b border-slate-800">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-500">Consultoria</p>
-              <p className="text-sm text-slate-400">Painel Estratégico</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-500">{t('chat.sidebar.header')}</p>
+              <p className="text-sm text-slate-400">{t('chat.sidebar.subHeader')}</p>
             </div>
             <div className="h-9 w-9 rounded-full border border-sky-500/50 flex items-center justify-center text-xs font-semibold text-sky-300 bg-slate-950/80">
               CN
@@ -323,7 +328,7 @@ export function Chat() {
           >
             <span className="inline-flex items-center gap-2">
               <Plus className="h-4 w-4" />
-              Nova Sessão de Consultoria
+              {t('chat.sidebar.newSessionButton')}
             </span>
           </button>
         </div>
@@ -331,14 +336,14 @@ export function Chat() {
         <div className="flex-1 overflow-y-auto px-3 py-4 text-xs">
           <div className="flex items-center justify-between px-2 mb-2">
             <span className="text-[11px] font-medium text-slate-400 uppercase tracking-[0.2em]">
-              Histórico de sessões
+              {t('chat.sidebar.history')}
             </span>
             {isLoadingSessions && <Loader2 className="h-3 w-3 animate-spin text-slate-500" />}
           </div>
 
           {sessions.length === 0 && !isLoadingSessions && (
             <p className="text-[11px] text-slate-500 px-2">
-              As sessões anteriores aparecerão aqui conforme você utilizar o painel.
+              {t('chat.sidebar.emptyHistory')}
             </p>
           )}
 
@@ -358,11 +363,11 @@ export function Chat() {
                 </span>
                 <span className="flex-1 min-w-0">
                   <span className="block text-[11px] font-medium text-slate-200 truncate">
-                    {session.title || 'Sessão de consultoria'}
+                    {session.title || t('chat.session.defaultTitle')}
                   </span>
                   {session.createdAt && (
                     <span className="block text-[10px] text-slate-500 mt-0.5">
-                      {new Date(session.createdAt).toLocaleString('pt-BR', {
+                      {new Date(session.createdAt).toLocaleString(i18n.language, {
                         dateStyle: 'short',
                         timeStyle: 'short',
                       })}
@@ -373,7 +378,7 @@ export function Chat() {
                   role="button"
                   onClick={(e) => handleDeleteSession(session.id, e)}
                   className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-400 text-slate-600 transition-opacity"
-                  title="Excluir conversa"
+                  title={t('chat.sidebar.deleteConversation')}
                 >
                   <Trash2 className="h-3 w-3" />
                 </span>
@@ -385,7 +390,7 @@ export function Chat() {
         <div className="px-4 py-3 border-t border-slate-800 text-[11px] text-slate-500 flex items-center justify-between">
           <div className="flex flex-col">
             <span className="font-medium text-slate-300">{userId}</span>
-            <span className="text-[10px] text-slate-500">Acesso corporativo</span>
+            <span className="text-[10px] text-slate-500">{t('chat.sidebar.userAccessLevel')}</span>
           </div>
           <button
             type="button"
@@ -393,7 +398,7 @@ export function Chat() {
             className="inline-flex items-center gap-1 rounded-md border border-slate-700 px-2 py-1 text-[11px] text-slate-300 hover:bg-slate-900"
           >
             <LogOut className="h-3 w-3" />
-            Sair
+            {t('chat.sidebar.logout')}
           </button>
         </div>
       </aside>
@@ -405,9 +410,9 @@ export function Chat() {
               <MessageSquareMore className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-sm md:text-base font-semibold text-slate-900 dark:text-slate-50">Consultoria Estratégica</h1>
+              <h1 className="text-sm md:text-base font-semibold text-slate-900 dark:text-slate-50">{t('chat.header.title')}</h1>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Mentoria de negócios em tempo real, orientada por dados e benchmarks de mercado.
+                {t('chat.header.subtitle')}
               </p>
             </div>
           </div>
@@ -415,8 +420,8 @@ export function Chat() {
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400">
               <span className="flex flex-col text-right">
-                <span>Consultor IA Ativo</span>
-                <span className="text-sky-600 dark:text-sky-400 font-medium">Linha Estratégica</span>
+                <span>{t('chat.header.aiStatus')}</span>
+                <span className="text-sky-600 dark:text-sky-400 font-medium">{t('chat.header.aiModel')}</span>
               </span>
               <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.2)]" />
             </div>
@@ -426,7 +431,7 @@ export function Chat() {
             <button
               onClick={() => setIsSettingsOpen(true)}
               className="p-2 rounded-md text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-colors"
-              title="Configurações"
+              title={t('chat.header.settings')}
             >
               <Settings className="h-5 w-5" />
             </button>
@@ -437,18 +442,17 @@ export function Chat() {
           <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 space-y-6">
             {currentSession.messages.length === 0 && !isLoading && (
               <div className="max-w-2xl mx-auto rounded-xl border border-dashed border-slate-800 bg-slate-950/60 px-6 py-6 md:px-8 md:py-8">
-                <p className="text-xs uppercase tracking-[0.25em] text-sky-500 mb-3">Briefing inicial</p>
+                <p className="text-xs uppercase tracking-[0.25em] text-sky-500 mb-3">{t('chat.body.initialBriefing.title')}</p>
                 <h2 className="text-lg font-semibold text-slate-50 mb-3">
-                  Estruture sua sessão de consultoria de negócios
+                  {t('chat.body.initialBriefing.heading')}
                 </h2>
                 <p className="text-sm text-slate-400 mb-4">
-                  Descreva brevemente o contexto da sua empresa, objetivo da consultoria e horizonte de tempo. A IA
-                  irá estruturar uma análise com foco em priorização, riscos e oportunidades.
+                  {t('chat.body.initialBriefing.paragraph')}
                 </p>
                 <ul className="text-xs text-slate-400 space-y-1">
-                  <li>• Ex: &quot;Sou CEO de uma SaaS B2B em estágio inicial no Brasil&quot;</li>
-                  <li>• Ex: &quot;Quero aumentar receita recorrente em 12 meses&quot;</li>
-                  <li>• Ex: &quot;Quero avaliar expansão para novos segmentos ou países&quot;</li>
+                  <li>• {t('chat.body.initialBriefing.example1')}</li>
+                  <li>• {t('chat.body.initialBriefing.example2')}</li>
+                  <li>• {t('chat.body.initialBriefing.example3')}</li>
                 </ul>
               </div>
             )}
@@ -465,7 +469,7 @@ export function Chat() {
                     }`}
                   >
                     {!isUser && (
-                      <div className="text-[11px] font-medium text-sky-400 mb-1.5">Consultor Estratégico</div>
+                      <div className="text-[11px] font-medium text-sky-400 mb-1.5">{t('chat.body.aiMessage.senderName')}</div>
                     )}
                     {isUser ? (
                       <p>{message.text}</p>
@@ -476,10 +480,10 @@ export function Chat() {
                         <div className="mt-6 pt-4 border-t border-slate-800/50">
                           <p className="text-[10px] text-slate-500 mb-3 uppercase tracking-wider font-medium flex items-center gap-2">
                             <Target className="h-3 w-3" />
-                            Aprofundar análise em:
+                            {t('chat.body.aiMessage.deepDive')}
                           </p>
                           <div className="flex flex-wrap gap-2">
-                            {FOCUS_AREAS.map((area) => (
+                            {focusAreas.map((area) => (
                               <button
                                 key={area.id}
                                 onClick={() => handleDeepDive(area)}
@@ -501,7 +505,7 @@ export function Chat() {
             {isLoading && (
               <div className="flex items-center gap-2 text-xs text-slate-400">
                 <Loader2 className="h-3 w-3 animate-spin" />
-                <span>Analisando contexto, cenários e implicações estratégicas...</span>
+                <span>{t('chat.body.loading')}</span>
               </div>
             )}
 
@@ -523,9 +527,9 @@ export function Chat() {
                   }`}
                 >
                   <Target className="h-3 w-3" />
-                  Visão Integrada
+                  {t('chat.footer.integratedView')}
                 </button>
-                {FOCUS_AREAS.map((area) => (
+                {focusAreas.map((area) => (
                   <button
                     key={area.id}
                     type="button"
@@ -546,26 +550,34 @@ export function Chat() {
                   type="button"
                   onClick={handleGenerateReport}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all whitespace-nowrap bg-slate-800 text-sky-400 border border-slate-700 hover:bg-slate-700 hover:text-sky-300 hover:border-sky-500/30"
-                  title="Gerar relatório completo da conversa"
+                  title={t('chat.footer.generateReportTooltip')}
                 >
                   <FileText className="h-3 w-3" />
-                  Gerar Relatório
+                  {t('chat.footer.generateReport')}
                 </button>
               </div>
             </div>
 
             <form onSubmit={handleSubmit} className="max-w-3xl mx-auto space-y-2">
               <div className="flex items-end gap-3">
-                <div className="flex-1 rounded-lg border border-slate-800 bg-slate-950/80 px-3 py-2">
+                <div className="flex-1 rounded-lg border border-slate-800 bg-slate-950/80 px-3 py-2 flex items-end gap-2">
                   <textarea
                     ref={inputRef}
                     rows={2}
                     className="w-full resize-none bg-transparent text-sm text-slate-50 placeholder:text-slate-500 focus:outline-none"
-                    placeholder="Formule sua pergunta de negócio de forma objetiva. Ex: 'Quais alavancas posso usar para aumentar margens em 20% nos próximos 12 meses?'"
+                    placeholder={t('chat.footer.textareaPlaceholder')}
                     value={input}
                     onChange={(event) => setInput(event.target.value)}
                     onKeyDown={handleKeyDown}
                   />
+                  <button
+                    type="button"
+                    onClick={handleGenerateReport}
+                    className="text-slate-400 hover:text-slate-200 p-1 rounded-md"
+                    title={t('chat.footer.generateReportTooltip')}
+                  >
+                    <FileText className="h-4 w-4" />
+                  </button>
                 </div>
                 <button
                   type="submit"
@@ -573,12 +585,11 @@ export function Chat() {
                   className="btn-primary h-10 w-10 md:w-auto md:px-4 md:gap-2 flex-shrink-0"
                 >
                   <Send className="h-4 w-4" />
-                  <span className="hidden md:inline text-xs">Enviar</span>
+                  <span className="hidden md:inline text-xs">{t('chat.footer.send')}</span>
                 </button>
               </div>
               <p className="text-[10px] text-slate-500">
-                As respostas são geradas por modelos de IA e devem ser usadas como insumo para discussão, não como
-                recomendação definitiva. Não compartilhe informações confidenciais sem autorização.
+                {t('chat.footer.disclaimer')}
               </p>
             </form>
           </div>
@@ -590,7 +601,7 @@ export function Chat() {
               <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50">
                 <h2 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                   <Settings className="h-5 w-5 text-sky-500" />
-                  Configurações
+                  {t('chat.settings.title')}
                 </h2>
                 <button onClick={() => setIsSettingsOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
                   <X className="h-5 w-5" />
@@ -602,7 +613,7 @@ export function Chat() {
                 <div className="space-y-3">
                   <label className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
                     <Globe className="h-4 w-4" />
-                    Idioma do Consultor
+                    {t('chat.settings.language.label')}
                   </label>
                   <div className="grid grid-cols-3 gap-2">
                     {[
@@ -629,13 +640,13 @@ export function Chat() {
                 <div className="space-y-3">
                   <label className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
                     <Zap className="h-4 w-4" />
-                    Nível de Franqueza
+                    {t('chat.settings.tone.label')}
                   </label>
                   <div className="grid grid-cols-1 gap-2">
                     {[
-                      { level: 1, label: 'Honesto Compassivo', desc: 'Coaching e feedback construtivo.' },
-                      { level: 2, label: 'Socrático Cooperativo', desc: 'Investigação conjunta e lógica.' },
-                      { level: 3, label: 'Honesto Brutal', desc: 'Verdade crua e corte de autoengano.' }
+                      { level: 1, label: t('chat.settings.tone.level1.label'), desc: t('chat.settings.tone.level1.desc') },
+                      { level: 2, label: t('chat.settings.tone.level2.label'), desc: t('chat.settings.tone.level2.desc') },
+                      { level: 3, label: t('chat.settings.tone.level3.label'), desc: t('chat.settings.tone.level3.desc') }
                     ].map((tone) => (
                       <button
                         key={tone.level}
@@ -657,7 +668,7 @@ export function Chat() {
                 <div className="space-y-3">
                   <label className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
                     {theme === 'dark' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-                    Aparência
+                    {t('chat.settings.theme.label')}
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     <button
@@ -669,7 +680,7 @@ export function Chat() {
                       }`}
                     >
                       <Sun className="h-4 w-4" />
-                      Light Mode
+                      {t('chat.settings.theme.light')}
                     </button>
                     <button
                       onClick={() => setTheme('dark')}
@@ -680,7 +691,7 @@ export function Chat() {
                       }`}
                     >
                       <Moon className="h-4 w-4" />
-                      Dark Mode
+                      {t('chat.settings.theme.dark')}
                     </button>
                   </div>
                 </div>
@@ -689,19 +700,19 @@ export function Chat() {
                 <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
                   <div className="bg-slate-50 dark:bg-slate-950/50 rounded-xl p-4 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-slate-900 dark:text-white">Plano Pro</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">Acesso ilimitado ao consultor</p>
+                      <p className="text-sm font-medium text-slate-900 dark:text-white">{t('chat.settings.subscription.title')}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{t('chat.settings.subscription.description')}</p>
                     </div>
                     <button className="flex items-center gap-2 px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-xs font-bold hover:opacity-90 transition-opacity">
                       <CreditCard className="h-3 w-3" />
-                      Manage Subscription
+                      {t('chat.settings.subscription.button')}
                     </button>
                   </div>
                 </div>
               </div>
               
               <div className="p-4 bg-slate-50 dark:bg-slate-950/50 text-center text-[10px] text-slate-400 border-t border-slate-200 dark:border-slate-800">
-                Consultoria de Negócios AI v1.2.0
+                {t('chat.settings.version')}
               </div>
             </div>
           </div>

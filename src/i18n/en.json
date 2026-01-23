@@ -1,0 +1,78 @@
+{
+  "chat": {
+    "sidebar": {
+      "header": "Consulting",
+      "subHeader": "Strategic Panel",
+      "newSessionButton": "New Consulting Session",
+      "history": "Session History",
+      "emptyHistory": "Previous sessions will appear here.",
+      "deleteConversation": "Delete conversation",
+      "confirmDelete": "Are you sure you want to delete this conversation?",
+      "userAccessLevel": "Corporate Access",
+      "logout": "Log Out"
+    },
+    "header": {
+      "title": "Strategic Consulting",
+      "subtitle": "Real-time business mentoring, driven by data and market benchmarks.",
+      "aiStatus": "Active AI Consultant",
+      "aiModel": "Strategic Line",
+      "settings": "Settings"
+    },
+    "body": {
+      "initialBriefing": {
+        "title": "Initial Briefing",
+        "heading": "Structure your business consulting session",
+        "paragraph": "Briefly describe your company's context, consulting objective, and time horizon. The AI will structure an analysis focusing on prioritization, risks, and opportunities.",
+        "example1": "e.g., \"I am the CEO of an early-stage B2B SaaS in Brazil\"",
+        "example2": "e.g., \"I want to increase recurring revenue within 12 months\"",
+        "example3": "e.g., \"I want to evaluate expansion into new segments or countries\""
+      },
+      "aiMessage": {
+        "senderName": "Strategic Consultant",
+        "deepDive": "Deepen analysis in:"
+      },
+      "loading": "Analyzing context, scenarios, and strategic implications...",
+      "error": "Could not get the consultant's response. Please try again in a few moments."
+    },
+    "footer": {
+      "focusGeneral": "Session Focus: General",
+      "generateReport": "Generate Strategic Report",
+      "inputPlaceholder": "Type your message or describe your business challenge..."
+    },
+    "session": {
+      "new": "New consulting session",
+      "defaultTitle": "Consulting session"
+    },
+    "focusAreas": {
+      "sales": "Sales",
+      "marketing": "Marketing and Branding",
+      "finance": "Finance and Legal",
+      "management": "Management and Strategy",
+      "tech": "Technology and Innovation"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage interface and session settings.",
+    "language": {
+      "label": "Language",
+      "description": "Sets the language for the interface and AI responses."
+    },
+    "theme": {
+      "label": "Appearance",
+      "description": "Customize the look and feel of the interface.",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "tone": {
+      "label": "Consultant's Frankness Level",
+      "description": "Adjust the frankness and depth of the AI consultant.",
+      "level1": "Level 1: Empathetic Coach",
+      "level1_desc": "Kinder, more motivational responses, focused on building confidence and providing positive guidance.",
+      "level2": "Level 2: Socratic Partner",
+      "level2_desc": "Responses that challenge assumptions with questions, encouraging deep reflection and autonomous discovery.",
+      "level3": "Level 3: Brutal Auditor",
+      "level3_desc": "Direct, no-nonsense, data-driven answers focused on efficiency and the unvarnished truth."
+    }
+  }
+}
