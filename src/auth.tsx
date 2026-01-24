@@ -1,35 +1,59 @@
 import { createContext, useContext, useEffect, useState } from 'react'
+import { User, Session } from '@supabase/supabase-js'
+import { supabase } from './supabase'
 
 type AuthContextValue = {
-  userId: string | null
-  signIn: (email: string) => void
-  signOut: () => void
+  user: User | null
+  session: Session | null
+  loading: boolean
+  signInWithEmail: (email: string) => Promise<{ error: any }>
+  signOut: () => Promise<{ error: any }>
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [userId, setUserId] = useState<string | null>(null)
+  const [user, setUser] = useState<User | null>(null)
+  const [session, setSession] = useState<Session | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const stored = window.localStorage.getItem('consultoria_user_id')
-    if (stored) {
-      setUserId(stored)
-    }
+    // Verifica sessão atual
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+      setUser(session?.user ?? null)
+      setLoading(false)
+    })
+
+    // Escuta mudanças de estado (login/logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+      setUser(session?.user ?? null)
+      setLoading(false)
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
 
-  function signIn(email: string) {
-    const trimmed = email.trim()
-    setUserId(trimmed)
-    window.localStorage.setItem('consultoria_user_id', trimmed)
+  async function signInWithEmail(email: string) {
+    const redirectTo = window.location.origin // Redireciona para a home após clicar no link
+    return supabase.auth.signInWithOtp({ 
+      email: email.trim(),
+      options: {
+        emailRedirectTo: redirectTo,
+      }
+    })
   }
 
-  function signOut() {
-    setUserId(null)
-    window.localStorage.removeItem('consultoria_user_id')
+  async function signOut() {
+    return supabase.auth.signOut()
   }
 
-  return <AuthContext.Provider value={{ userId, signIn, signOut }}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={{ user, session, loading, signInWithEmail, signOut }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 export function useAuth() {
@@ -39,4 +63,3 @@ export function useAuth() {
   }
   return ctx
 }
-

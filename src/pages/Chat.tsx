@@ -78,7 +78,7 @@ type SessionState = {
 
 export function Chat() {
   const { t, i18n } = useTranslation()
-  const { userId, signOut } = useAuth()
+  const { user, signOut } = useAuth()
   const [sessions, setSessions] = useState<SessionSummary[]>([])
   const [currentSession, setCurrentSession] = useState<SessionState>({
     id: null,
@@ -130,13 +130,13 @@ export function Chat() {
   }, [toneLevel])
 
   useEffect(() => {
-    if (!userId) return
+    if (!user) return
     setIsLoadingSessions(true)
 
-    const stored = loadSessionsFromStorage(userId)
+    const stored = loadSessionsFromStorage(user.id)
     setSessions(stored)
     setIsLoadingSessions(false)
-  }, [userId])
+  }, [user])
 
   useEffect(() => {
     if (!messagesEndRef.current) return
@@ -153,8 +153,8 @@ export function Chat() {
   }
 
   function handleSelectSession(session: SessionSummary) {
-    if (!userId) return
-    const messages = loadMessagesFromStorage(userId, session.id)
+    if (!user) return
+    const messages = loadMessagesFromStorage(user.id, session.id)
     setCurrentSession({
       id: session.id,
       title: session.title,
@@ -165,17 +165,17 @@ export function Chat() {
 
   function handleDeleteSession(sessionId: string, event: React.MouseEvent) {
     event.stopPropagation()
-    if (!userId) return
+    if (!user) return
 
     if (!window.confirm(t('chat.sidebar.confirmDelete'))) return
 
     const nextSessions = sessions.filter((s) => s.id !== sessionId)
     setSessions(nextSessions)
-    saveSessionsToStorage(userId, nextSessions)
+    saveSessionsToStorage(user.id, nextSessions)
     
     // Clean up messages from storage
     try {
-      window.localStorage.removeItem(getMessagesKey(userId, sessionId))
+      window.localStorage.removeItem(getMessagesKey(user.id, sessionId))
     } catch {}
 
     if (currentSession.id === sessionId) {
@@ -184,7 +184,7 @@ export function Chat() {
   }
 
   async function sendMessage(text: string, focusOverride?: string) {
-    if (!userId || !text.trim()) return
+    if (!user || !text.trim()) return
 
     const focusToSend = focusOverride !== undefined ? focusOverride : selectedFocus
     const now = new Date().toISOString()
@@ -206,7 +206,7 @@ export function Chat() {
 
     try {
       const result = await sendConsultoriaMessage({
-        userId,
+        userId: user.id,
         conversationId: currentSession.id,
         message: text,
         history: currentSession.messages,
@@ -232,7 +232,7 @@ export function Chat() {
         messages: fullMessages,
       }))
 
-      if (userId) {
+      if (user) {
         let createdAt = now
         let title = currentSession.title
         const existing = sessions.find((s) => s.id === conversationId)
@@ -255,16 +255,16 @@ export function Chat() {
           const index = prev.findIndex((s) => s.id === conversationId)
           if (index === -1) {
             const next = [summary, ...prev]
-            saveSessionsToStorage(userId, next)
+            saveSessionsToStorage(user.id, next)
             return next
           }
           const next = [...prev]
           next[index] = summary
-          saveSessionsToStorage(userId, next)
+          saveSessionsToStorage(user.id, next)
           return next
         })
 
-        saveMessagesToStorage(userId, conversationId, fullMessages)
+        saveMessagesToStorage(user.id, conversationId, fullMessages)
       }
     } catch (err: any) {
       console.error(err)
@@ -291,7 +291,7 @@ export function Chat() {
         onNewSession={handleNewSession}
         onSelectSession={handleSelectSession}
         onDeleteSession={handleDeleteSession}
-        userId={userId}
+        userId={user?.id || ''}
         onSignOut={signOut}
       />
 
