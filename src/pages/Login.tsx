@@ -6,7 +6,7 @@ import { useAuth } from '../auth'
 
 export function Login() {
   const { t } = useTranslation()
-  const { signInWithEmail, signInWithPassword, signUp } = useAuth()
+  const { signInWithEmail, signInWithPassword, signUp, resendSignUp } = useAuth()
   const [mode, setMode] = useState<'password' | 'magic_link' | 'signup'>('password')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -32,14 +32,11 @@ export function Login() {
           console.error('Signup error:', error)
           setMessage({ type: 'error', text: error.message || 'Erro ao criar conta.' })
         } else {
-          // Check if email confirmation is required (Supabase default usually requires it)
-          if (data?.user && !data.session) {
-             setMessage({ type: 'success', text: 'Conta criada! Verifique seu e-mail para confirmar.' })
-             // Maybe switch to magic link or password mode?
-          } else {
-             // Auto logged in
-             // AuthProvider handles redirect
-          }
+           if (data?.user && !data.session) {
+              setMessage({ type: 'success', text: 'Conta criada! Verifique seu e-mail para confirmar.' })
+           } else {
+              // Auto logged in
+           }
         }
       } else {
         const { error } = await signInWithEmail(email)
@@ -55,6 +52,23 @@ export function Login() {
       setMessage({ type: 'error', text: err?.message || 'Erro inesperado. Tente novamente.' })
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleResendSignUp() {
+    if (!email.trim()) return
+    setLoading(true)
+    try {
+        const { error } = await resendSignUp(email)
+        if (error) {
+             setMessage({ type: 'error', text: error.message || 'Erro ao reenviar e-mail.' })
+        } else {
+             setMessage({ type: 'success', text: 'E-mail de confirmação reenviado!' })
+        }
+    } catch (e: any) {
+        setMessage({ type: 'error', text: e?.message || 'Erro ao reenviar.' })
+    } finally {
+        setLoading(false)
     }
   }
 
@@ -151,6 +165,20 @@ export function Login() {
               >
                 <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                 Enviar novo link
+              </button>
+            </div>
+          )}
+
+          {mode === 'signup' && message?.type === 'success' && (
+            <div className="space-y-3 pt-2 animate-in fade-in slide-in-from-top-2">
+              <button
+                type="button"
+                onClick={handleResendSignUp}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors text-sm font-medium border border-slate-700"
+              >
+                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                Reenviar e-mail de confirmação
               </button>
             </div>
           )}

@@ -9,6 +9,7 @@ type AuthContextValue = {
   signInWithEmail: (email: string) => Promise<{ error: any }>
   signInWithPassword: (email: string, password: string) => Promise<{ error: any }>
   signUp: (email: string, password: string) => Promise<{ error: any, data: any }>
+  resendSignUp: (email: string) => Promise<{ error: any }>
   updatePassword: (password: string) => Promise<{ error: any }>
   signOut: () => Promise<{ error: any }>
 }
@@ -66,6 +67,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
   }
 
+  async function resendSignUp(email: string) {
+    const redirectTo = window.location.origin
+    return supabase.auth.resend({
+      type: 'signup',
+      email: email.trim(),
+      options: {
+        emailRedirectTo: redirectTo,
+      }
+    })
+  }
+
   async function updatePassword(password: string) {
     return supabase.auth.updateUser({ password })
   }
@@ -75,7 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signInWithEmail, signInWithPassword, signUp, updatePassword, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, signInWithEmail, signInWithPassword, signUp, resendSignUp, updatePassword, signOut }}>
       {children}
     </AuthContext.Provider>
   )
