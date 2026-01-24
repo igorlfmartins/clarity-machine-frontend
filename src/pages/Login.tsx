@@ -1,6 +1,6 @@
 import type { FormEvent } from 'react'
 import { useState } from 'react'
-import { Mail, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { Mail, CheckCircle, AlertCircle, Loader2, RefreshCw } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../auth'
 
@@ -11,8 +11,8 @@ export function Login() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
-  async function handleSubmit(event: FormEvent) {
-    event.preventDefault()
+  async function handleSendLink(event?: FormEvent) {
+    if (event) event.preventDefault()
     if (!email.trim()) return
 
     setLoading(true)
@@ -52,7 +52,7 @@ export function Login() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSendLink} className="space-y-6">
           <div className="space-y-4">
             <div className="space-y-1">
               <label htmlFor="email" className="text-sm font-medium text-slate-200">
@@ -84,6 +84,28 @@ export function Login() {
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             {message?.type === 'success' ? 'Link Enviado' : 'Receber Link de Acesso'}
           </button>
+
+          {message?.type === 'success' && (
+            <div className="space-y-3 pt-2 animate-in fade-in slide-in-from-top-2">
+              <button
+                type="button"
+                onClick={() => handleSendLink()}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors text-sm font-medium border border-slate-700"
+              >
+                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                Enviar novo link
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => setMessage(null)}
+                className="w-full text-xs text-slate-500 hover:text-sky-400 transition-colors"
+              >
+                Usar outro e-mail
+              </button>
+            </div>
+          )}
         </form>
 
         <p className="text-[11px] text-slate-500 text-center leading-relaxed">
