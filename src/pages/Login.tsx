@@ -6,8 +6,8 @@ import { useAuth } from '../auth'
 
 export function Login() {
   const { t } = useTranslation()
-  const { signInWithEmail, signInWithPassword } = useAuth()
-  const [mode, setMode] = useState<'password' | 'magic_link'>('password')
+  const { signInWithEmail, signInWithPassword, signUp } = useAuth()
+  const [mode, setMode] = useState<'password' | 'magic_link' | 'signup'>('password')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -15,7 +15,7 @@ export function Login() {
 
   async function submitLogin() {
     if (!email.trim()) return
-    if (mode === 'password' && !password) return
+    if ((mode === 'password' || mode === 'signup') && !password) return
 
     setLoading(true)
     setMessage(null)
@@ -26,7 +26,21 @@ export function Login() {
         if (error) {
           setMessage({ type: 'error', text: 'Email ou senha incorretos.' })
         }
-        // Se sucesso, o AuthProvider vai redirecionar automaticamente
+      } else if (mode === 'signup') {
+        const { error, data } = await signUp(email, password)
+        if (error) {
+          console.error('Signup error:', error)
+          setMessage({ type: 'error', text: error.message || 'Erro ao criar conta.' })
+        } else {
+          // Check if email confirmation is required (Supabase default usually requires it)
+          if (data?.user && !data.session) {
+             setMessage({ type: 'success', text: 'Conta criada! Verifique seu e-mail para confirmar.' })
+             // Maybe switch to magic link or password mode?
+          } else {
+             // Auto logged in
+             // AuthProvider handles redirect
+          }
+        }
       } else {
         const { error } = await signInWithEmail(email)
         if (error) {
@@ -55,10 +69,10 @@ export function Login() {
         <div className="space-y-2 text-center">
           <p className="text-xs uppercase tracking-[0.35em] text-sky-500">{t('login.appTitle')}</p>
           <h1 className="text-2xl font-semibold text-slate-50">
-            {mode === 'password' ? 'Entrar com Senha' : t('login.title')}
+            {mode === 'signup' ? 'Criar Conta' : (mode === 'password' ? 'Entrar com Senha' : t('login.title'))}
           </h1>
           <p className="text-sm text-slate-400">
-            {mode === 'password' ? 'Digite suas credenciais para acessar' : t('login.subtitle')}
+            {mode === 'signup' ? 'Preencha seus dados para começar' : (mode === 'password' ? 'Digite suas credenciais para acessar' : t('login.subtitle'))}
           </p>
         </div>
 
@@ -89,12 +103,12 @@ export function Login() {
                   placeholder={t('login.emailPlaceholder')}
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
-                  disabled={loading || message?.type === 'success'}
+                  disabled={loading || (mode === 'magic_link' && message?.type === 'success')}
                 />
               </div>
             </div>
 
-            {mode === 'password' && (
+            {(mode === 'password' || mode === 'signup') && (
               <div className="space-y-1">
                 <label htmlFor="password" className="text-sm font-medium text-slate-200">
                   Senha
@@ -106,7 +120,7 @@ export function Login() {
                   <input
                     id="password"
                     type="password"
-                    autoComplete="current-password"
+                    autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                     className="input-base pl-9"
                     placeholder="Sua senha segura"
                     value={password}
@@ -124,7 +138,7 @@ export function Login() {
             disabled={loading || (mode === 'magic_link' && message?.type === 'success')}
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            {mode === 'magic_link' && message?.type === 'success' ? 'Link Enviado' : (mode === 'password' ? 'Entrar' : 'Receber Link de Acesso')}
+            {mode === 'signup' ? 'Cadastrar' : (mode === 'magic_link' && message?.type === 'success' ? 'Link Enviado' : (mode === 'password' ? 'Entrar' : 'Receber Link de Acesso'))}
           </button>
 
           {mode === 'magic_link' && message?.type === 'success' && (
@@ -141,26 +155,59 @@ export function Login() {
             </div>
           )}
           
-          <div className="pt-2 border-t border-slate-800">
-            <button
-              type="button"
-              onClick={() => {
-                setMode(mode === 'password' ? 'magic_link' : 'password')
-                setMessage(null)
-              }}
-              className="w-full text-sm text-slate-400 hover:text-sky-400 transition-colors flex items-center justify-center gap-2"
-            >
-              {mode === 'password' ? (
-                <>
-                  <span>Esqueci minha senha / Primeiro acesso</span>
-                </>
-              ) : (
-                <>
+          <div className="pt-2 border-t border-slate-800 space-y-3">
+             {mode === 'password' && (
+               <div className="flex flex-col gap-2">
+                 <button
+                    type="button"
+                    onClick={() => {
+                      setMode('magic_link')
+                      setMessage(null)
+                    }}
+                    className="w-full text-sm text-slate-400 hover:text-sky-400 transition-colors"
+                  >
+                    Esqueci minha senha / Entrar sem senha
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode('signup')
+                      setMessage(null)
+                    }}
+                    className="w-full text-sm text-slate-400 hover:text-sky-400 transition-colors font-medium"
+                  >
+                    Não tem conta? Cadastre-se
+                  </button>
+               </div>
+             )}
+
+             {mode === 'magic_link' && (
+               <button
+                  type="button"
+                  onClick={() => {
+                    setMode('password')
+                    setMessage(null)
+                  }}
+                  className="w-full text-sm text-slate-400 hover:text-sky-400 transition-colors flex items-center justify-center gap-2"
+                >
                   <ArrowLeft className="h-3 w-3" />
                   <span>Voltar para login com senha</span>
-                </>
-              )}
-            </button>
+                </button>
+             )}
+
+             {mode === 'signup' && (
+               <button
+                  type="button"
+                  onClick={() => {
+                    setMode('password')
+                    setMessage(null)
+                  }}
+                  className="w-full text-sm text-slate-400 hover:text-sky-400 transition-colors flex items-center justify-center gap-2"
+                >
+                  <ArrowLeft className="h-3 w-3" />
+                  <span>Já tem conta? Entrar</span>
+                </button>
+             )}
           </div>
         </form>
 

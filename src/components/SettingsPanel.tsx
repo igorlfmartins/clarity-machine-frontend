@@ -30,19 +30,26 @@ export function SettingsPanel({
   const { updatePassword } = useAuth()
   const [newPassword, setNewPassword] = useState('')
   const [passwordStatus, setPasswordStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle')
+  const [errorMessage, setErrorMessage] = useState('')
 
   async function handleUpdatePassword() {
     if (!newPassword || newPassword.length < 6) return
     setPasswordStatus('saving')
+    setErrorMessage('')
     try {
       const { error } = await updatePassword(newPassword)
       if (error) throw error
       setPasswordStatus('success')
       setNewPassword('')
       setTimeout(() => setPasswordStatus('idle'), 3000)
-    } catch (e) {
+    } catch (e: any) {
+      console.error('Password update error:', e)
+      setErrorMessage(e?.message || 'Erro ao atualizar senha')
       setPasswordStatus('error')
-      setTimeout(() => setPasswordStatus('idle'), 3000)
+      setTimeout(() => {
+        setPasswordStatus('idle')
+        setErrorMessage('')
+      }, 5000)
     }
   }
 
@@ -112,7 +119,7 @@ export function SettingsPanel({
               )}
               {passwordStatus === 'error' && (
                 <p className="text-[10px] text-red-500 flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" /> Erro ao atualizar senha
+                  <AlertCircle className="h-3 w-3" /> {errorMessage || 'Erro ao atualizar senha'}
                 </p>
               )}
               <p className="text-[10px] text-slate-400">
