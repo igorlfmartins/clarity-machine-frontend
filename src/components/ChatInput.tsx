@@ -48,37 +48,42 @@ export function ChatInput({ onSendMessage, onGenerateReport, onToggleLive, isLoa
           <textarea
             ref={inputRef}
             rows={1}
-            className="w-full resize-none bg-transparent text-sm text-slate-50 placeholder:text-slate-500 focus:outline-none"
+            className="w-full resize-none bg-transparent text-sm text-slate-50 placeholder:text-slate-500 focus:outline-none py-1"
             placeholder={t('chat.footer.textareaPlaceholder')}
             value={input}
             onChange={(event) => setInput(event.target.value)}
             onKeyDown={handleKeyDown}
           />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="submit"
+            disabled={!canSend}
+            className="btn-primary h-10 w-10 md:w-auto md:px-4 md:gap-2 flex-shrink-0 flex items-center justify-center"
+          >
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            <span className="hidden md:inline text-xs">{t('chat.footer.send')}</span>
+          </button>
+
           <button
             type="button"
             onClick={onToggleLive}
-            className="text-sky-500 hover:text-sky-400 p-1 rounded-md transition-colors"
+            className="h-10 w-10 flex items-center justify-center rounded-lg border border-slate-800 bg-slate-950/50 text-sky-500 hover:bg-slate-900 hover:text-sky-400 transition-colors"
             title="Live Mode"
           >
             <Mic className="h-4 w-4" />
           </button>
+          
           <button
             type="button"
             onClick={onGenerateReport}
-            className="text-slate-400 hover:text-slate-200 p-1 rounded-md"
+            className="h-10 w-10 flex items-center justify-center rounded-lg border border-slate-800 bg-slate-950/50 text-slate-400 hover:bg-slate-900 hover:text-slate-200 transition-colors"
             title={t('chat.footer.generateReportTooltip')}
           >
             <FileText className="h-4 w-4" />
           </button>
         </div>
-        <button
-          type="submit"
-          disabled={!canSend}
-          className="btn-primary h-10 w-10 md:w-auto md:px-4 md:gap-2 flex-shrink-0"
-        >
-          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-          <span className="hidden md:inline text-xs">{t('chat.footer.send')}</span>
-        </button>
       </div>
       <p className="text-[10px] text-slate-500">
         {t('chat.footer.disclaimer')}
