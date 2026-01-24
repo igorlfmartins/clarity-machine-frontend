@@ -30,13 +30,15 @@ export function Login() {
       } else {
         const { error } = await signInWithEmail(email)
         if (error) {
-          setMessage({ type: 'error', text: 'Erro ao enviar link. Verifique o e-mail.' })
+          console.error('Auth error:', error)
+          setMessage({ type: 'error', text: error.message || 'Erro ao enviar link. Verifique o e-mail.' })
         } else {
           setMessage({ type: 'success', text: 'Link de acesso enviado! Verifique sua caixa de entrada.' })
         }
       }
-    } catch (err) {
-      setMessage({ type: 'error', text: 'Erro inesperado. Tente novamente.' })
+    } catch (err: any) {
+      console.error('Unexpected error:', err)
+      setMessage({ type: 'error', text: err?.message || 'Erro inesperado. Tente novamente.' })
     } finally {
       setLoading(false)
     }
