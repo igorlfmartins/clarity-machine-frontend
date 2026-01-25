@@ -24,7 +24,11 @@ export function Login() {
       if (mode === 'password') {
         const { error } = await signInWithPassword(email, password)
         if (error) {
-          setMessage({ type: 'error', text: 'Email ou senha incorretos.' })
+          if (error.message.includes('Email not confirmed')) {
+            setMessage({ type: 'error', text: 'E-mail não confirmado.' })
+          } else {
+            setMessage({ type: 'error', text: 'Email ou senha incorretos.' })
+          }
         }
       } else if (mode === 'signup') {
         const { error, data } = await signUp(email, password)
@@ -169,7 +173,7 @@ export function Login() {
             </div>
           )}
 
-          {mode === 'signup' && message?.type === 'success' && (
+          {((mode === 'signup' && message?.type === 'success') || (message?.text === 'E-mail não confirmado.')) && (
             <div className="space-y-3 pt-2 animate-in fade-in slide-in-from-top-2">
               <button
                 type="button"
