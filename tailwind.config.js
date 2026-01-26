@@ -9,19 +9,16 @@ export default {
         mono: ['Space Mono', 'monospace'],
       },
       colors: {
-        neon: {
-          magenta: '#FF00FF',
-          green: '#39FF14',
-          blue: '#00F0FF',
-          purple: '#BC13FE',
-          orange: '#FF5E00',
+        bio: {
+          deep: '#032F24',   // Deep Forest Green (Background Principal)
+          purple: '#7B8DFF', // Digital Lavender (Destaque Secundário)
+          teal: '#00D68F',   // Vibrant Teal (Ações / Blocos Informativos)
+          lime: '#D4FF33',   // Acid Lime (Highlights / Ícones)
+          white: '#F5F7F2',  // Off-white para textos em fundos escuros
         },
-        navy: {
-          950: '#020617',
-          900: '#0B0B0F',
-          800: '#14141A',
-          700: '#1E1E26',
-        },
+      },
+      backgroundImage: {
+        'cross-pattern': "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20h-4v-4h4v4zm0 0h4v-4h-4v4zm0 0h-4v4h4v-4zm0 0h4v4h-4v-4z' fill='%23D4FF33' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E\")",
       },
       letterSpacing: {
         'geometric': '0.1em',

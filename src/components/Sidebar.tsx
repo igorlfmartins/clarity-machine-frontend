@@ -1,4 +1,4 @@
-import { Plus, Hash, Trash2, Loader2, LogOut } from 'lucide-react'
+import { Plus, Trash2, Loader2, LogOut } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { SessionSummary } from '../api'
 
@@ -26,37 +26,42 @@ export function Sidebar({
   const { t, i18n } = useTranslation()
 
   return (
-    <aside className="hidden md:flex md:w-72 lg:w-80 flex-col border-r border-slate-800 bg-navy-950">
-      <div className="px-6 pt-8 pb-6 border-b border-slate-800">
-        <div className="mb-8 relative">
-          <div className="absolute -left-6 top-0 w-1 h-8 bg-neon-blue" />
-          <p className="text-[10px] font-bold uppercase tracking-geometric text-neon-blue mb-1 font-mono">{t('chat.sidebar.header')}</p>
-          <h2 className="text-xl font-bold text-white tracking-geometric font-mono">{t('chat.sidebar.subHeader')}</h2>
+    <aside className="hidden md:flex md:w-80 flex-col border-r-4 border-bio-deep bg-bio-deep text-bio-white">
+      <div className="p-8 bg-bio-deep relative overflow-hidden group">
+        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+           <div className="w-16 h-16 border-4 border-bio-lime rounded-full" />
+        </div>
+        
+        <div className="relative z-10">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-bio-lime mb-2 font-mono">{t('chat.sidebar.header')}</p>
+          <h2 className="text-3xl font-bold text-white tracking-tighter font-mono leading-none">{t('chat.sidebar.subHeader')}</h2>
         </div>
 
         <button
           type="button"
           onClick={onNewSession}
-          className="btn-primary w-full"
+          className="mt-8 w-full bg-bio-lime text-bio-deep font-mono font-bold py-4 hover:bg-bio-white transition-colors flex items-center justify-center gap-2 uppercase tracking-wide text-sm"
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="h-4 w-4" />
           {t('chat.sidebar.newSessionButton')}
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-6 text-xs">
-        <div className="flex items-center justify-between px-2 mb-4">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-geometric">
+      <div className="flex-1 overflow-y-auto bg-bio-deep">
+        <div className="px-8 py-4 flex items-center justify-between border-b border-bio-white/10">
+          <span className="text-[10px] font-bold text-bio-white/50 uppercase tracking-widest font-mono">
             {t('chat.sidebar.history')}
           </span>
-          {isLoading && <Loader2 className="h-3 w-3 animate-spin text-neon-blue" />}
+          {isLoading && <Loader2 className="h-3 w-3 animate-spin text-bio-lime" />}
         </div>
 
-        <div className="space-y-2">
+        <div className="grid grid-cols-1">
           {sessions.length === 0 && !isLoading && (
-            <p className="text-[11px] text-slate-600 px-2 italic">
-              {t('chat.sidebar.emptyHistory')}
-            </p>
+            <div className="p-8 text-center border-b border-bio-white/5">
+              <p className="text-xs text-bio-white/40 italic font-mono">
+                {t('chat.sidebar.emptyHistory')}
+              </p>
+            </div>
           )}
 
           {sessions.map((session) => {
@@ -66,37 +71,30 @@ export function Sidebar({
                 key={session.id}
                 type="button"
                 onClick={() => onSelectSession(session)}
-                className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-all group relative border ${
+                className={`w-full text-left p-6 border-b border-bio-white/10 transition-all group relative ${
                   isActive 
-                    ? 'bg-navy-900 border-neon-blue/30 text-white' 
-                    : 'border-transparent hover:bg-navy-900/50 hover:border-slate-800'
+                    ? 'bg-bio-purple text-bio-deep' 
+                    : 'bg-bio-deep text-bio-white hover:bg-bio-white/5'
                 }`}
               >
-                {isActive && (
-                  <div className="absolute left-0 top-0 w-0.5 h-full bg-neon-blue" />
-                )}
-                <span className={`mt-0.5 ${isActive ? 'text-neon-blue' : 'text-slate-600'}`}>
-                  <Hash className="h-3 w-3" />
-                </span>
-                <span className="flex-1 min-w-0">
-                  <span className={`block text-[11px] font-medium truncate ${isActive ? 'text-white' : 'text-slate-400'}`}>
-                    {session.title || t('chat.session.defaultTitle')}
+                <div className="flex items-start justify-between mb-2">
+                  <span className={`text-[10px] font-bold uppercase tracking-widest font-mono ${isActive ? 'text-bio-deep/70' : 'text-bio-lime'}`}>
+                     {session.createdAt ? new Date(session.createdAt).toLocaleDateString(i18n.language) : 'NO DATE'}
                   </span>
-                  {session.createdAt && (
-                    <span className="block text-[9px] text-slate-600 mt-1 font-bold uppercase tracking-widest">
-                      {new Date(session.createdAt).toLocaleString(i18n.language, {
-                        dateStyle: 'short',
-                      })}
-                    </span>
-                  )}
-                </span>
+                  {isActive && <div className="w-2 h-2 bg-bio-deep rounded-full animate-pulse" />}
+                </div>
+                
+                <h3 className={`font-mono font-bold text-sm leading-tight line-clamp-2 ${isActive ? 'text-bio-deep' : 'text-bio-white'}`}>
+                   {session.title || t('chat.session.defaultTitle')}
+                </h3>
+
                 <span
                   role="button"
                   onClick={(e) => onDeleteSession(session.id, e)}
-                  className="opacity-0 group-hover:opacity-100 p-1 hover:text-neon-magenta text-slate-600 transition-opacity"
+                  className={`absolute right-4 bottom-4 p-2 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'text-bio-deep hover:bg-bio-deep/10' : 'text-bio-white hover:bg-bio-white/10'}`}
                   title={t('chat.sidebar.deleteConversation')}
                 >
-                  <Trash2 className="h-3 w-3" />
+                  <Trash2 className="h-4 w-4" />
                 </span>
               </button>
             )
@@ -104,19 +102,19 @@ export function Sidebar({
         </div>
       </div>
 
-      <div className="px-6 py-4 border-t border-slate-800 bg-navy-900/50">
-        <div className="flex items-center justify-between mb-4">
+      <div className="p-6 border-t-4 border-bio-lime bg-bio-deep">
+        <div className="flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-white tracking-geometric truncate max-w-[120px]">{userId}</span>
-            <span className="text-[9px] text-slate-600 uppercase tracking-geometric">{t('chat.sidebar.userAccessLevel')}</span>
+            <span className="text-xs font-bold text-bio-white tracking-tight font-mono truncate max-w-[150px]">{userId}</span>
+            <span className="text-[10px] text-bio-lime uppercase tracking-widest font-mono">{t('chat.sidebar.userAccessLevel')}</span>
           </div>
           <button
             type="button"
             onClick={onSignOut}
-            className="p-2 text-slate-500 hover:text-neon-magenta hover:bg-neon-magenta/5 border border-transparent hover:border-neon-magenta/20 transition-all"
+            className="p-3 text-bio-white/50 hover:text-bio-lime hover:bg-bio-white/5 transition-all"
             title={t('chat.sidebar.logout')}
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-5 w-5" />
           </button>
         </div>
       </div>

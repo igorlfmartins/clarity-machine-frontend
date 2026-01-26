@@ -1,6 +1,6 @@
 import type { FormEvent } from 'react'
 import { useState } from 'react'
-import { Mail, CheckCircle, AlertCircle, Loader2, Lock, ArrowLeft } from 'lucide-react'
+import { Loader2, ArrowLeft, ArrowRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../auth'
 
@@ -65,149 +65,128 @@ export function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-navy-950 text-slate-50 flex items-center justify-center px-4 font-sans bg-grid-pattern">
-      <div className="w-full max-w-md bg-navy-900 border border-slate-800 p-10 space-y-10 relative overflow-hidden">
-        {/* Geometric Decorative Elements */}
-        <div className="absolute top-0 right-0 w-24 h-24 border-t-2 border-r-2 border-neon-blue opacity-10 -mr-12 -mt-12 rotate-45" />
-        <div className="absolute bottom-0 left-0 w-16 h-1 bg-neon-magenta opacity-20" />
+    <div className="min-h-screen bg-bio-deep p-4 font-sans flex items-stretch">
+      <div className="w-full max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1">
         
-        <div className="space-y-4 text-center relative z-10">
-          <p className="text-[10px] font-bold uppercase tracking-geometric text-neon-blue font-mono">{t('login.appTitle')}</p>
-          <h1 className="text-3xl font-bold text-white tracking-geometric font-mono">
-            {mode === 'signup' ? 'CRIAR CONTA' : (mode === 'password' ? 'ENTRAR' : t('login.title').toUpperCase())}
-          </h1>
-          <div className="h-1 w-12 bg-neon-magenta mx-auto" />
-          <p className="text-xs text-slate-500 uppercase tracking-widest leading-relaxed">
-            {mode === 'signup' ? 'Preencha seus dados para começar' : (mode === 'password' ? 'Digite suas credenciais para acessar' : t('login.subtitle'))}
-          </p>
+        {/* Left Block: Hero / Branding */}
+        <div className="bg-bio-purple relative flex flex-col justify-between p-8 lg:p-16 overflow-hidden group">
+           <div className="absolute top-0 right-0 p-8 opacity-20 group-hover:opacity-40 transition-opacity duration-700">
+             <div className="grid grid-cols-3 gap-4">
+                {[...Array(9)].map((_, i) => (
+                  <div key={i} className="w-12 h-12 border-2 border-bio-deep rounded-full flex items-center justify-center">
+                    <div className="w-2 h-2 bg-bio-deep rounded-full" />
+                  </div>
+                ))}
+             </div>
+           </div>
+           
+           <div className="z-10">
+             <div className="flex items-center gap-3 mb-8">
+               <div className="w-4 h-4 bg-bio-lime" />
+               <span className="font-mono text-xs font-bold uppercase tracking-widest text-bio-deep">Consultoria.AI</span>
+             </div>
+             <h1 className="font-mono text-5xl lg:text-7xl font-bold text-bio-deep leading-tight tracking-tight">
+               ADVANCING<br/>
+               BUSINESS<br/>
+               INTELLIGENCE
+             </h1>
+           </div>
+
+           <div className="z-10 space-y-4">
+             <div className="w-24 h-2 bg-bio-lime" />
+             <p className="font-sans text-xl lg:text-2xl text-bio-deep font-medium max-w-md">
+               {t('login.subtitle')}
+             </p>
+           </div>
         </div>
 
-        {message && (
-          <div className={`p-5 rounded-none flex items-center gap-4 text-xs font-bold uppercase tracking-widest ${
-            message.type === 'success' ? 'bg-neon-green/5 text-neon-green border border-neon-green/20' : 'bg-neon-magenta/5 text-neon-magenta border border-neon-magenta/20'
-          }`}>
-            {message.type === 'success' ? <CheckCircle className="h-5 w-5 shrink-0" /> : <AlertCircle className="h-5 w-5 shrink-0" />}
-            <span>{message.text}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-[10px] font-bold text-slate-500 uppercase tracking-geometric">
-                {t('login.emailLabel')}
-              </label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-600">
-                  <Mail className="h-4 w-4" />
-                </span>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  className="input-base pl-12"
-                  placeholder={t('login.emailPlaceholder').toUpperCase()}
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  disabled={loading || (mode === 'magic_link' && message?.type === 'success')}
-                />
-              </div>
-            </div>
-
-            {(mode === 'password' || mode === 'signup') && (
-              <div className="space-y-2">
-                <label htmlFor="password" className="text-[10px] font-bold text-slate-500 uppercase tracking-geometric">
-                  SENHA
-                </label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-600">
-                    <Lock className="h-4 w-4" />
-                  </span>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-                    className="input-base pl-12"
-                    placeholder="SUA SENHA SEGURA"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    disabled={loading}
-                  />
+        {/* Right Block: Login Form */}
+        <div className="flex flex-col gap-4">
+          <div className="bg-bio-teal flex-1 flex flex-col justify-center p-8 lg:p-16 relative overflow-hidden">
+             <div className="absolute inset-0 bg-cross-pattern opacity-10" />
+             
+             <div className="relative z-10 max-w-md mx-auto w-full space-y-8">
+                <div>
+                  <h2 className="font-mono text-3xl font-bold text-bio-deep mb-2">
+                    {mode === 'signup' ? 'CRIAR CONTA' : (mode === 'password' ? 'ENTRAR' : 'ACESSO')}
+                  </h2>
+                  <p className="text-bio-deep/70 font-mono text-xs uppercase tracking-wider">
+                    {mode === 'signup' ? 'Preencha seus dados' : 'Credenciais de acesso'}
+                  </p>
                 </div>
-              </div>
-            )}
+
+                {message && (
+                  <div className={`p-4 font-mono text-xs font-bold border-l-4 ${
+                    message.type === 'success' ? 'bg-bio-lime/20 border-bio-lime text-bio-deep' : 'bg-bio-deep/10 border-bio-deep text-bio-deep'
+                  }`}>
+                    {message.text}
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="font-mono text-xs font-bold text-bio-deep uppercase block">Email</label>
+                    <input
+                      type="email"
+                      className="w-full bg-bio-deep/5 border-2 border-bio-deep/10 p-4 font-mono text-sm text-bio-deep placeholder:text-bio-deep/40 focus:outline-none focus:border-bio-deep focus:bg-bio-deep/10 transition-all"
+                      placeholder="seu@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={loading}
+                    />
+                  </div>
+
+                  {(mode === 'password' || mode === 'signup') && (
+                    <div className="space-y-2">
+                      <label className="font-mono text-xs font-bold text-bio-deep uppercase block">Senha</label>
+                      <input
+                        type="password"
+                        className="w-full bg-bio-deep/5 border-2 border-bio-deep/10 p-4 font-mono text-sm text-bio-deep placeholder:text-bio-deep/40 focus:outline-none focus:border-bio-deep focus:bg-bio-deep/10 transition-all"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        disabled={loading}
+                      />
+                    </div>
+                  )}
+
+                  <button 
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-bio-deep text-bio-lime font-mono font-bold text-lg py-5 hover:bg-opacity-95 transition-colors flex items-center justify-center gap-3"
+                  >
+                    {loading && <Loader2 className="h-5 w-5 animate-spin" />}
+                    {mode === 'signup' ? 'REGISTRAR' : (mode === 'magic_link' && message?.type === 'success' ? 'ENVIADO' : 'INICIAR SESSÃO')}
+                    {!loading && <ArrowRight className="h-5 w-5" />}
+                  </button>
+                </form>
+
+                <div className="flex gap-4 pt-4 border-t border-bio-deep/10">
+                   {mode === 'password' && (
+                     <>
+                       <button onClick={() => setMode('magic_link')} className="text-[10px] font-mono font-bold uppercase text-bio-deep/60 hover:text-bio-deep">Sem senha</button>
+                       <button onClick={() => setMode('signup')} className="text-[10px] font-mono font-bold uppercase text-bio-deep/60 hover:text-bio-deep ml-auto">Criar conta</button>
+                     </>
+                   )}
+                   {mode !== 'password' && (
+                     <button onClick={() => setMode('password')} className="text-[10px] font-mono font-bold uppercase text-bio-deep/60 hover:text-bio-deep flex items-center gap-1">
+                       <ArrowLeft className="h-3 w-3" /> Voltar
+                     </button>
+                   )}
+                </div>
+             </div>
           </div>
 
-          <button 
-            type="submit" 
-            className="btn-primary w-full py-4"
-            disabled={loading || (mode === 'magic_link' && message?.type === 'success')}
-          >
-            {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-            {mode === 'signup' ? 'CADASTRAR' : (mode === 'magic_link' && message?.type === 'success' ? 'LINK ENVIADO' : (mode === 'password' ? 'ENTRAR' : 'RECEBER LINK'))}
-          </button>
-
-          <div className="pt-8 border-t border-slate-800 space-y-4">
-             {mode === 'password' && (
-               <div className="flex flex-col gap-3">
-                 <button
-                    type="button"
-                    onClick={() => {
-                      setMode('magic_link')
-                      setMessage(null)
-                    }}
-                    className="w-full text-[10px] font-bold text-slate-500 hover:text-neon-blue uppercase tracking-geometric transition-colors"
-                  >
-                    Entrar sem senha
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode('signup')
-                      setMessage(null)
-                    }}
-                    className="w-full text-[10px] font-bold text-slate-500 hover:text-neon-magenta uppercase tracking-geometric transition-colors"
-                  >
-                    Criar nova conta
-                  </button>
-               </div>
-             )}
-
-             {mode === 'magic_link' && (
-               <button
-                  type="button"
-                  onClick={() => {
-                    setMode('password')
-                    setMessage(null)
-                  }}
-                  className="w-full text-[10px] font-bold text-slate-500 hover:text-neon-blue uppercase tracking-geometric transition-colors flex items-center justify-center gap-2"
-                >
-                  <ArrowLeft className="h-3 w-3" />
-                  <span>Voltar para senha</span>
-                </button>
-             )}
-
-             {mode === 'signup' && (
-               <button
-                  type="button"
-                  onClick={() => {
-                    setMode('password')
-                    setMessage(null)
-                  }}
-                  className="w-full text-[10px] font-bold text-slate-500 hover:text-neon-blue uppercase tracking-geometric transition-colors flex items-center justify-center gap-2"
-                >
-                  <ArrowLeft className="h-3 w-3" />
-                  <span>Já tem conta? Entrar</span>
-                </button>
-             )}
+          <div className="h-24 bg-bio-lime p-6 flex items-center justify-between">
+             <div className="flex gap-2">
+               <div className="w-2 h-2 bg-bio-deep rounded-full" />
+               <div className="w-2 h-2 bg-bio-deep rounded-full opacity-50" />
+               <div className="w-2 h-2 bg-bio-deep rounded-full opacity-25" />
+             </div>
+             <p className="font-mono text-[10px] font-bold text-bio-deep uppercase">Secure Environment v2.0</p>
           </div>
-        </form>
+        </div>
 
-        <p className="text-[9px] text-slate-600 text-center leading-loose uppercase tracking-widest font-bold opacity-50">
-          {t('login.footer')}
-        </p>
       </div>
     </div>
   )

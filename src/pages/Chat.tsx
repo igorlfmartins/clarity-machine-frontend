@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Loader2, MessageSquareMore, Target, ArrowRight, Settings } from 'lucide-react'
+import { Loader2, MessageSquareMore, Target, Settings } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import { useTranslation } from 'react-i18next'
 import { ChatInput } from '../components/ChatInput'
@@ -86,7 +86,7 @@ export function Chat() {
     title: t('chat.session.new'),
     messages: [],
   })
-  const [selectedFocus, setSelectedFocus] = useState<string | null>(null)
+  const [selectedFocus] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingSessions, setIsLoadingSessions] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -284,189 +284,180 @@ export function Chat() {
     sendMessage(t('chat.footer.generateReport'))
   }
 
+  const [input, setInput] = useState('')
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!input.trim() || isLoading) return
+    const msg = input
+    setInput('')
+    await sendMessage(msg)
+  }
+
   return (
-    <div className="min-h-screen bg-navy-950 text-slate-50 flex font-sans bg-grid-pattern">
-      <Sidebar
-        sessions={sessions}
-        currentSessionId={currentSession.id}
-        isLoading={isLoadingSessions}
-        onNewSession={handleNewSession}
-        onSelectSession={handleSelectSession}
-        onDeleteSession={handleDeleteSession}
-        userId={user?.id || ''}
-        onSignOut={signOut}
-      />
-
-      <main className="flex-1 flex flex-col min-w-0 bg-transparent transition-colors duration-300">
-        <header className="border-b border-slate-800 bg-navy-950/80 backdrop-blur-md flex items-center justify-between px-8 py-6">
-          <div className="flex items-center gap-4">
-            <div className="p-2 bg-neon-blue/10 border border-neon-blue/20">
-              <MessageSquareMore className="h-5 w-5 text-neon-blue" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-white tracking-geometric font-mono">{t('chat.header.title')}</h1>
-              <p className="text-[10px] text-slate-500 uppercase tracking-widest">{t('chat.header.subtitle')}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <div className="hidden sm:flex items-center gap-3 text-[10px] uppercase tracking-geometric font-bold text-neon-green bg-neon-green/5 border border-neon-green/20 px-4 py-1.5">
-              <span className="inline-flex h-1.5 w-1.5 bg-neon-green shadow-[0_0_8px_rgba(57,255,20,0.8)]" />
-              {t('chat.header.aiStatus')}
-            </div>
-
-            <button
-              onClick={() => setIsSettingsOpen(true)}
-              className="p-2 text-slate-400 hover:text-neon-magenta hover:bg-neon-magenta/5 border border-transparent hover:border-neon-magenta/20 transition-all"
-            >
-              <Settings className="h-5 w-5" />
-            </button>
-          </div>
-        </header>
-
-        <section className="flex-1 flex flex-col min-h-0">
-          <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8 space-y-8">
-            {currentSession.messages.length === 0 && !isLoading && (
-              <div className="max-w-3xl mx-auto card-modular">
-                <p className="text-[10px] uppercase tracking-geometric text-neon-blue mb-4 font-mono">{t('chat.body.initialBriefing.title')}</p>
-                <h2 className="text-xl font-bold text-white mb-6 font-mono">
-                  {t('chat.body.initialBriefing.heading')}
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="p-6 bg-navy-950 border border-slate-800 hover:border-neon-blue transition-colors group">
-                    <p className="text-sm text-slate-400 group-hover:text-white transition-colors">{t('chat.body.initialBriefing.example1')}</p>
-                  </div>
-                  <div className="p-6 bg-navy-950 border border-slate-800 hover:border-neon-magenta transition-colors group">
-                    <p className="text-sm text-slate-400 group-hover:text-white transition-colors">{t('chat.body.initialBriefing.example2')}</p>
-                  </div>
-                  <div className="p-6 bg-navy-950 border border-slate-800 hover:border-neon-green transition-colors group">
-                    <p className="text-sm text-slate-400 group-hover:text-white transition-colors">{t('chat.body.initialBriefing.example3')}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {currentSession.messages.map((message) => {
-              const isUser = message.sender === 'user'
-              return (
-                <div key={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-                  <div
-                    className={`max-w-2xl px-6 py-4 text-sm relative ${
-                      isUser
-                        ? 'bg-navy-900 border border-slate-800 text-white'
-                        : 'bg-transparent border-l-2 border-neon-blue text-slate-200'
-                    }`}
-                  >
-                    {isUser && (
-                      <div className="absolute top-0 right-0 w-1 h-full bg-neon-magenta opacity-50" />
-                    )}
-                    <div className="flex flex-col gap-3">
-                      {!isUser && (
-                        <span className="text-[10px] uppercase tracking-geometric text-neon-blue font-bold">
-                          {t('chat.body.aiMessage.senderName')}
-                        </span>
-                      )}
-                      <ReactMarkdown className="prose prose-invert prose-sm max-w-none">
-                         {message.text}
-                       </ReactMarkdown>
-
-                       {!isUser && (
-                         <div className="mt-8 pt-6 border-t border-slate-800/50">
-                           <p className="text-[9px] text-slate-500 mb-4 uppercase tracking-geometric font-bold flex items-center gap-2">
-                             <Target className="h-3 w-3 text-neon-magenta" />
-                             {t('chat.body.aiMessage.deepDive')}
-                           </p>
-                           <div className="flex flex-wrap gap-3">
-                             {focusAreas.map((area) => (
-                               <button
-                                 key={area.id}
-                                 onClick={() => handleDeepDive(area)}
-                                 className="flex items-center gap-2 px-4 py-2 border border-slate-800 bg-navy-900/50 text-[10px] font-bold uppercase tracking-geometric text-slate-400 hover:border-neon-blue hover:text-white transition-all"
-                               >
-                                 {area.label}
-                                 <ArrowRight className="h-3 w-3 opacity-30" />
-                               </button>
-                             ))}
-                           </div>
-                         </div>
-                       )}
-                     </div>
-                   </div>
-                </div>
-              )
-            })}
-
-            {isLoading && (
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-                <Loader2 className="h-3 w-3 animate-spin" />
-                <span>{t('chat.body.loading')}</span>
-              </div>
-            )}
-
-            {error && <p className="text-xs text-red-400">{error}</p>}
-
-            <div ref={messagesEndRef} />
-          </div>
-
-          <div className="border-t border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-950/95 backdrop-blur px-6 py-6 transition-colors duration-300">
-            <div className="max-w-3xl mx-auto mb-4 overflow-x-auto no-scrollbar">
-              <div className="flex gap-2 justify-center">
-                <button
-                  type="button"
-                  onClick={() => setSelectedFocus(null)}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-semibold transition-all whitespace-nowrap ${
-                    selectedFocus === null
-                      ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                      : 'bg-slate-200 text-slate-500 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  {t('chat.footer.integratedView')}
-                </button>
-                {focusAreas.map((area) => (
-                  <button
-                    key={area.id}
-                    type="button"
-                    onClick={() => setSelectedFocus(selectedFocus === area.label ? null : area.label)}
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-semibold transition-all whitespace-nowrap ${
-                      selectedFocus === area.label
-                        ? 'bg-sky-500 text-white'
-                        : 'bg-slate-200 text-slate-500 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
-                    }`}
-                  >
-                    {area.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <ChatInput
-              onSendMessage={sendMessage}
-              onGenerateReport={handleGenerateReport}
-              onToggleLive={() => setIsLiveMode(true)}
-              isLoading={isLoading}
-            />
-          </div>
-        </section>
-
-        {isLiveMode && (
-          <LiveMode 
-            onClose={() => setIsLiveMode(false)}
-            systemInstruction={t('chat.header.aiStatus')} // Fallback or logic to get actual prompt
-          />
-        )}
-
-        <SettingsPanel
-          isOpen={isSettingsOpen}
-          onClose={() => setIsSettingsOpen(false)}
-          language={language}
-          setLanguage={setLanguage}
-          theme={theme}
-          setTheme={setTheme}
-          toneLevel={toneLevel}
-          setToneLevel={setToneLevel}
+    <div className="h-screen bg-bio-deep text-bio-deep flex font-sans overflow-hidden">
+      <div className="flex-1 flex max-w-[1920px] mx-auto w-full border-x border-bio-deep/10 bg-bio-white">
+        <Sidebar
+          sessions={sessions}
+          currentSessionId={currentSession.id}
+          isLoading={isLoadingSessions}
+          onNewSession={handleNewSession}
+          onSelectSession={handleSelectSession}
+          onDeleteSession={handleDeleteSession}
+          userId={user?.id || ''}
           onSignOut={signOut}
         />
-      </main>
+
+        <main className="flex-1 flex flex-col min-w-0 bg-bio-white relative">
+          {/* Header Block */}
+          <header className="h-20 bg-bio-teal flex items-center justify-between px-8 border-b-4 border-bio-deep">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-bio-deep flex items-center justify-center">
+                <MessageSquareMore className="h-5 w-5 text-bio-teal" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-bio-deep tracking-tight font-mono leading-none uppercase">{t('chat.header.title')}</h1>
+                <p className="text-[10px] font-bold text-bio-deep/60 uppercase tracking-widest font-mono">System Active</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-6">
+              <div className="hidden sm:flex items-center gap-3 bg-bio-deep/10 px-4 py-2 rounded-full border border-bio-deep/10">
+                <span className="inline-flex h-2 w-2 bg-bio-lime animate-pulse rounded-full" />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-bio-deep font-mono">
+                  {t('chat.header.aiStatus')}
+                </span>
+              </div>
+
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="p-3 bg-bio-deep text-bio-teal hover:bg-bio-purple hover:text-bio-deep transition-colors"
+              >
+                <Settings className="h-5 w-5" />
+              </button>
+            </div>
+          </header>
+
+          <section className="flex-1 flex flex-col min-h-0 relative">
+            <div className="absolute inset-0 bg-cross-pattern opacity-5 pointer-events-none" />
+            
+            <div className="flex-1 overflow-y-auto px-4 md:px-12 py-8 space-y-8 scroll-smooth">
+              {currentSession.messages.length === 0 && !isLoading && (
+                <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-4 mt-8">
+                  <div className="md:col-span-8 bg-bio-deep p-8 md:p-12 flex flex-col justify-between min-h-[300px] relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                      <Target className="h-32 w-32 text-bio-white" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-bio-lime uppercase tracking-widest mb-4 font-mono">{t('chat.body.initialBriefing.title')}</p>
+                      <h2 className="text-3xl md:text-4xl font-bold text-bio-white font-mono leading-tight">
+                        {t('chat.body.initialBriefing.heading')}
+                      </h2>
+                    </div>
+                    <div className="mt-8 pt-8 border-t border-bio-white/10">
+                      <p className="text-bio-white/60 text-sm font-mono">
+                        Selecione um módulo operacional ao lado ou inicie uma nova query.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-4 grid grid-rows-3 gap-4">
+                    <div className="bg-bio-purple p-6 flex flex-col justify-center hover:brightness-110 cursor-pointer transition-all">
+                      <p className="text-bio-deep text-sm font-bold font-mono leading-tight">{t('chat.body.initialBriefing.example1')}</p>
+                    </div>
+                    <div className="bg-bio-teal p-6 flex flex-col justify-center hover:brightness-110 cursor-pointer transition-all">
+                      <p className="text-bio-deep text-sm font-bold font-mono leading-tight">{t('chat.body.initialBriefing.example2')}</p>
+                    </div>
+                    <div className="bg-bio-lime p-6 flex flex-col justify-center hover:brightness-110 cursor-pointer transition-all">
+                      <p className="text-bio-deep text-sm font-bold font-mono leading-tight">{t('chat.body.initialBriefing.example3')}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {currentSession.messages.map((message) => {
+                const isUser = message.sender === 'user'
+                return (
+                  <div key={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+                    <div
+                      className={`max-w-3xl p-6 md:p-8 text-base font-medium relative ${
+                        isUser
+                          ? 'bg-bio-deep text-bio-white ml-12'
+                          : 'bg-bio-white border-2 border-bio-deep text-bio-deep mr-12'
+                      }`}
+                    >
+                      <div className="absolute -top-3 left-6 px-2 bg-inherit">
+                        <span className={`text-[10px] font-bold uppercase tracking-widest font-mono ${isUser ? 'text-bio-lime' : 'text-bio-deep'}`}>
+                          {isUser ? 'USER_INPUT' : 'SYSTEM_RESPONSE'}
+                        </span>
+                      </div>
+                      
+                      <ReactMarkdown className={`prose max-w-none ${isUser ? 'prose-invert' : 'prose-headings:font-mono prose-headings:uppercase'}`}>
+                        {message.text}
+                      </ReactMarkdown>
+
+                      {!isUser && (
+                        <div className="mt-6 pt-4 border-t-2 border-bio-deep/10 flex flex-wrap gap-2">
+                          {focusAreas.map((area) => (
+                            <button
+                              key={area.id}
+                              onClick={() => handleDeepDive(area)}
+                              className="px-3 py-1 bg-bio-purple/10 hover:bg-bio-purple text-bio-deep text-[10px] font-bold uppercase tracking-widest transition-colors font-mono"
+                            >
+                              {area.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+              
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-bio-lime p-4 flex items-center gap-3">
+                    <Loader2 className="h-5 w-5 animate-spin text-bio-deep" />
+                    <span className="text-xs font-bold uppercase tracking-widest text-bio-deep font-mono">Processing Data Stream...</span>
+                  </div>
+                </div>
+              )}
+              {error && <p className="text-xs text-red-500 font-mono mt-4">{error}</p>}
+              <div ref={messagesEndRef} />
+            </div>
+
+            <div className="p-4 bg-bio-white border-t border-bio-deep/10">
+              <ChatInput
+                input={input}
+                setInput={setInput}
+                isLoading={isLoading}
+                onSubmit={handleSubmit}
+                onToggleLive={() => setIsLiveMode(true)}
+                onGenerateReport={handleGenerateReport}
+              />
+            </div>
+          </section>
+
+          {isLiveMode && (
+            <LiveMode 
+              onClose={() => setIsLiveMode(false)}
+              systemInstruction={t('chat.header.aiStatus')}
+            />
+          )}
+
+          <SettingsPanel
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+            language={language}
+            setLanguage={setLanguage}
+            theme={theme}
+            setTheme={setTheme}
+            toneLevel={toneLevel}
+            setToneLevel={setToneLevel}
+            onSignOut={signOut}
+          />
+        </main>
+      </div>
     </div>
   )
 }
