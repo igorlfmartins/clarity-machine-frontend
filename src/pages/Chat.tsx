@@ -308,7 +308,7 @@ export function Chat() {
           onSignOut={signOut}
         />
 
-        <main className="flex-1 flex flex-col min-w-0 bg-bio-white relative">
+        <main className="flex-1 flex flex-col min-w-0 bg-bio-white dark:bg-bio-deep relative">
           {/* Header Block */}
           <header className="h-20 bg-bio-teal flex items-center justify-between px-8 border-b-4 border-bio-deep">
             <div className="flex items-center gap-4">

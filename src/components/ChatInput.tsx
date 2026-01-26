@@ -38,15 +38,15 @@ export function ChatInput({ input, setInput, onSubmit, onGenerateReport, onToggl
   return (
     <form onSubmit={onSubmit} className="max-w-4xl mx-auto space-y-4 pb-8 px-4">
       <div className="flex flex-col md:flex-row items-stretch md:items-end gap-4">
-        <div className="flex-1 bg-bio-deep/5 border-2 border-bio-deep/10 p-4 relative group focus-within:border-bio-teal transition-colors">
-          <div className="absolute top-0 left-0 w-1 h-4 bg-bio-teal opacity-30" />
+        <div className="flex-1 bg-bio-deep/5 dark:bg-bio-deep border-2 border-bio-deep/10 dark:border-bio-white/20 p-4 relative group focus-within:border-bio-teal dark:focus-within:border-bio-lime transition-colors">
+          <div className="absolute top-0 left-0 w-1 h-4 bg-bio-teal dark:bg-bio-lime opacity-30" />
           <textarea
             id="chat-input"
             name="message"
             aria-label={t('chat.footer.inputPlaceholder')}
             ref={inputRef}
             rows={1}
-            className="w-full resize-none bg-transparent text-sm text-bio-deep placeholder:text-bio-deep/40 focus:outline-none py-1 leading-relaxed font-mono"
+            className="w-full resize-none bg-transparent text-sm text-bio-deep dark:text-bio-white placeholder:text-bio-deep/40 dark:placeholder:text-bio-white/40 focus:outline-none py-1 leading-relaxed font-mono"
             placeholder={t('chat.footer.textareaPlaceholder')}
             value={input}
             onChange={(event) => setInput(event.target.value)}
