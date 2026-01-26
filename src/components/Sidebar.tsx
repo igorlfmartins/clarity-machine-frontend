@@ -32,7 +32,11 @@ export function Sidebar({
       <div className={`bg-bio-deep relative overflow-hidden group flex flex-col ${isCollapsed ? 'p-4 items-center' : 'p-8'}`}>
         <div className="relative z-10 flex justify-between items-start w-full">
           {!isCollapsed && (
-            <p className="text-[10px] font-bold uppercase tracking-widest text-bio-lime mb-2 font-mono whitespace-nowrap overflow-hidden">{t('chat.sidebar.header')}</p>
+            <div className="text-[10px] font-bold uppercase tracking-widest text-bio-lime mb-2 font-mono flex flex-col items-start gap-1">
+              <span>Consultoria</span>
+              <span>Empresarial</span>
+              <span>Multi-Agente</span>
+            </div>
           )}
           <button 
             onClick={() => setIsCollapsed(!isCollapsed)}
