@@ -16,7 +16,7 @@ export function LiveMode({ onClose, systemInstruction }: LiveModeProps) {
   const [volume, setVolume] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
-  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<string>('Inicializando...');
   
   const wsRef = useRef<WebSocket | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -90,10 +90,11 @@ export function LiveMode({ onClose, systemInstruction }: LiveModeProps) {
 
       } catch (err: any) {
         console.error('Error accessing microphone:', err);
-        if (mounted) setConnectionError("Permissão de microfone negada");
+        if (mounted) setConnectionStatus("Permissão de Mic Negada");
       }
     };
 
+    setConnectionStatus("Aguardando Microfone...");
     initMicrophone();
 
     return () => {
@@ -132,11 +133,12 @@ export function LiveMode({ onClose, systemInstruction }: LiveModeProps) {
 
     const ws = new WebSocket(getWebSocketUrl());
     wsRef.current = ws;
+    setConnectionStatus("Conectando ao Socket...");
 
     ws.onopen = () => {
       console.log('WebSocket Connected');
       setIsConnected(true);
-      setConnectionError(null);
+      setConnectionStatus("Sistema Online");
       // Send initial setup
       const setupMsg = {
         setup: {
@@ -186,11 +188,12 @@ export function LiveMode({ onClose, systemInstruction }: LiveModeProps) {
     ws.onerror = (error) => {
       console.error("WebSocket Error:", error);
       setIsConnected(false);
-      setConnectionError("Erro de conexão com o servidor");
+      setConnectionStatus("Erro no Socket");
     };
 
     ws.onclose = () => {
       setIsConnected(false);
+      setConnectionStatus("Socket Fechado");
     };
 
     return () => {
@@ -253,8 +256,14 @@ export function LiveMode({ onClose, systemInstruction }: LiveModeProps) {
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <p className="text-[10px] uppercase tracking-geometric text-slate-500 font-bold">Modo Voz</p>
-                <p className={`text-sm font-bold tracking-geometric ${connectionError ? 'text-neon-magenta' : (isConnected ? 'text-neon-green' : 'text-neon-orange')}`}>
-                  {connectionError ? 'ERRO DE CONEXÃO' : (isConnected ? 'SISTEMA ONLINE' : 'INICIALIZANDO...')}
+                <p className={`text-sm font-bold tracking-geometric ${
+                  connectionStatus === 'Sistema Online' 
+                    ? 'text-neon-green' 
+                    : connectionStatus.includes('Erro') || connectionStatus.includes('Negada')
+                      ? 'text-neon-magenta' 
+                      : 'text-neon-orange'
+                }`}>
+                  {connectionStatus.toUpperCase()}
                 </p>
               </div>
               
