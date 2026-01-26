@@ -14,7 +14,10 @@ export default defineConfig({
     }
   },
   preview: {
-    allowedHosts: ['consultoria-de-negocios.up.railway.app']
+    allowedHosts: ['consultoria-de-negocios.up.railway.app'],
+    headers: {
+      "Content-Security-Policy": "default-src 'self' https: wss:; script-src 'self' 'unsafe-eval' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline'; connect-src 'self' https: wss: http://localhost:* ws://localhost:*;"
+    }
   }
 })
 
