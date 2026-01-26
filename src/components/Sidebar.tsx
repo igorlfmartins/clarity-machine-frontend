@@ -28,7 +28,7 @@ export function Sidebar({
   const [isCollapsed, setIsCollapsed] = useState(false)
 
   return (
-    <aside className={`hidden md:flex flex-col border-r-4 border-bio-lime bg-bio-deep text-bio-white transition-all duration-300 ease-in-out ${isCollapsed ? 'md:w-20' : 'md:w-80'}`}>
+    <aside className={`hidden md:flex flex-col border-r-4 border-bio-teal bg-bio-deep text-bio-white transition-all duration-300 ease-in-out ${isCollapsed ? 'md:w-20' : 'md:w-80'}`}>
       <div className={`bg-bio-deep relative overflow-hidden group flex flex-col ${isCollapsed ? 'p-4 items-center' : 'p-8'}`}>
         <div className="relative z-10 flex justify-between items-start w-full">
           {!isCollapsed && (
@@ -122,7 +122,7 @@ export function Sidebar({
         </div>
       </div>
 
-      <div className={`border-t-4 border-bio-lime bg-bio-deep ${isCollapsed ? 'p-4 flex justify-center' : 'p-6'}`}>
+      <div className={`border-t-4 border-bio-teal bg-bio-deep ${isCollapsed ? 'p-4 flex justify-center' : 'p-6'}`}>
         <div className="flex items-center justify-between">
           {!isCollapsed && (
             <div className="flex flex-col">
