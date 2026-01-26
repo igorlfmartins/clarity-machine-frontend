@@ -1,6 +1,7 @@
-import { Plus, Trash2, Loader2, LogOut } from 'lucide-react'
+import { Plus, Trash2, Loader2, LogOut, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { SessionSummary } from '../api'
+import { useState } from 'react'
 
 interface SidebarProps {
   sessions: SessionSummary[]
@@ -24,38 +25,51 @@ export function Sidebar({
   onSignOut,
 }: SidebarProps) {
   const { t, i18n } = useTranslation()
+  const [isCollapsed, setIsCollapsed] = useState(false)
 
   return (
-    <aside className="hidden md:flex md:w-80 flex-col border-r-4 border-bio-deep bg-bio-deep text-bio-white">
-      <div className="p-8 bg-bio-deep relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+    <aside className={`hidden md:flex flex-col border-r-4 border-bio-deep bg-bio-deep text-bio-white transition-all duration-300 ease-in-out ${isCollapsed ? 'md:w-20' : 'md:w-80'}`}>
+      <div className={`bg-bio-deep relative overflow-hidden group flex flex-col ${isCollapsed ? 'p-4 items-center' : 'p-8'}`}>
+        <div className={`absolute top-0 right-0 p-4 transition-opacity ${isCollapsed ? 'opacity-0' : 'opacity-10 group-hover:opacity-20'}`}>
            <div className="w-16 h-16 border-4 border-bio-lime rounded-full" />
         </div>
         
-        <div className="relative z-10">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-bio-lime mb-2 font-mono">{t('chat.sidebar.header')}</p>
+        <div className="relative z-10 flex justify-between items-start w-full">
+          {!isCollapsed && (
+            <p className="text-[10px] font-bold uppercase tracking-widest text-bio-lime mb-2 font-mono whitespace-nowrap overflow-hidden">{t('chat.sidebar.header')}</p>
+          )}
+          <button 
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className={`text-bio-lime hover:text-bio-white transition-colors ${isCollapsed ? 'mx-auto' : ''}`}
+            title={isCollapsed ? "Expandir" : "Recolher"}
+          >
+            {isCollapsed ? <PanelLeftOpen className="h-6 w-6" /> : <PanelLeftClose className="h-5 w-5" />}
+          </button>
         </div>
 
         <button
           type="button"
           onClick={onNewSession}
-          className="mt-8 w-full bg-bio-lime text-bio-deep font-mono font-bold py-4 hover:bg-bio-white transition-colors flex items-center justify-center gap-2 uppercase tracking-wide text-sm"
+          className={`mt-8 bg-bio-lime text-bio-deep font-mono font-bold hover:bg-bio-white transition-colors flex items-center justify-center gap-2 uppercase tracking-wide text-sm ${isCollapsed ? 'w-10 h-10 rounded-full p-0' : 'w-full py-4'}`}
+          title={t('chat.sidebar.newSessionButton')}
         >
           <Plus className="h-4 w-4" />
-          {t('chat.sidebar.newSessionButton')}
+          {!isCollapsed && t('chat.sidebar.newSessionButton')}
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto bg-bio-deep">
-        <div className="px-8 py-4 flex items-center justify-between border-b border-bio-white/10">
-          <span className="text-[10px] font-bold text-bio-white/50 uppercase tracking-widest font-mono">
-            {t('chat.sidebar.history')}
-          </span>
+      <div className="flex-1 overflow-y-auto bg-bio-deep scrollbar-thin">
+        <div className={`flex items-center border-b border-bio-white/10 ${isCollapsed ? 'justify-center py-4 px-0' : 'justify-between px-8 py-4'}`}>
+          {!isCollapsed && (
+            <span className="text-[10px] font-bold text-bio-white/50 uppercase tracking-widest font-mono">
+              {t('chat.sidebar.history')}
+            </span>
+          )}
           {isLoading && <Loader2 className="h-3 w-3 animate-spin text-bio-lime" />}
         </div>
 
         <div className="grid grid-cols-1">
-          {sessions.length === 0 && !isLoading && (
+          {sessions.length === 0 && !isLoading && !isCollapsed && (
             <div className="p-8 text-center border-b border-bio-white/5">
               <p className="text-xs text-bio-white/40 italic font-mono">
                 {t('chat.sidebar.emptyHistory')}
@@ -70,47 +84,56 @@ export function Sidebar({
                 key={session.id}
                 type="button"
                 onClick={() => onSelectSession(session)}
-                className={`w-full text-left p-6 border-b border-bio-white/10 transition-all group relative ${
+                className={`w-full text-left border-b border-bio-white/10 transition-all group relative ${
                   isActive 
                     ? 'bg-bio-purple text-bio-deep' 
                     : 'bg-bio-deep text-bio-white hover:bg-bio-white/5'
-                }`}
+                } ${isCollapsed ? 'p-4 flex justify-center' : 'p-6'}`}
+                title={isCollapsed ? (session.title || t('chat.session.defaultTitle')) : undefined}
               >
-                <div className="flex items-start justify-between mb-2">
-                  <span className={`text-[10px] font-bold uppercase tracking-widest font-mono ${isActive ? 'text-bio-deep/70' : 'text-bio-lime'}`}>
-                     {session.createdAt ? new Date(session.createdAt).toLocaleDateString(i18n.language) : 'NO DATE'}
-                  </span>
-                  {isActive && <div className="w-2 h-2 bg-bio-deep rounded-full animate-pulse" />}
-                </div>
-                
-                <h3 className={`font-mono font-bold text-sm leading-tight line-clamp-2 ${isActive ? 'text-bio-deep' : 'text-bio-white'}`}>
-                   {session.title || t('chat.session.defaultTitle')}
-                </h3>
+                {!isCollapsed ? (
+                  <>
+                    <div className="flex items-start justify-between mb-2">
+                      <span className={`text-[10px] font-bold uppercase tracking-widest font-mono ${isActive ? 'text-bio-deep/70' : 'text-bio-lime'}`}>
+                         {session.createdAt ? new Date(session.createdAt).toLocaleDateString(i18n.language) : 'NO DATE'}
+                      </span>
+                      {isActive && <div className="w-2 h-2 bg-bio-deep rounded-full animate-pulse" />}
+                    </div>
+                    
+                    <h3 className={`font-mono font-bold text-sm leading-tight line-clamp-2 ${isActive ? 'text-bio-deep' : 'text-bio-white'}`}>
+                       {session.title || t('chat.session.defaultTitle')}
+                    </h3>
 
-                <span
-                  role="button"
-                  onClick={(e) => onDeleteSession(session.id, e)}
-                  className={`absolute right-4 bottom-4 p-2 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'text-bio-deep hover:bg-bio-deep/10' : 'text-bio-white hover:bg-bio-white/10'}`}
-                  title={t('chat.sidebar.deleteConversation')}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </span>
+                    <span
+                      role="button"
+                      onClick={(e) => onDeleteSession(session.id, e)}
+                      className={`absolute right-4 bottom-4 p-2 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'text-bio-deep hover:bg-bio-deep/10' : 'text-bio-white hover:bg-bio-white/10'}`}
+                      title={t('chat.sidebar.deleteConversation')}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </span>
+                  </>
+                ) : (
+                  <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-bio-deep' : 'bg-bio-lime'}`} />
+                )}
               </button>
             )
           })}
         </div>
       </div>
 
-      <div className="p-6 border-t-4 border-bio-lime bg-bio-deep">
+      <div className={`border-t-4 border-bio-lime bg-bio-deep ${isCollapsed ? 'p-4 flex justify-center' : 'p-6'}`}>
         <div className="flex items-center justify-between">
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-bio-white tracking-tight font-mono truncate max-w-[150px]">{userId}</span>
-            <span className="text-[10px] text-bio-lime uppercase tracking-widest font-mono">{t('chat.sidebar.userAccessLevel')}</span>
-          </div>
+          {!isCollapsed && (
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-bio-white tracking-tight font-mono truncate max-w-[150px]">{userId}</span>
+              <span className="text-[10px] text-bio-lime uppercase tracking-widest font-mono">{t('chat.sidebar.userAccessLevel')}</span>
+            </div>
+          )}
           <button
             type="button"
             onClick={onSignOut}
-            className="p-3 text-bio-white/50 hover:text-bio-lime hover:bg-bio-white/5 transition-all"
+            className={`text-bio-white/50 hover:text-bio-lime hover:bg-bio-white/5 transition-all ${isCollapsed ? 'p-2' : 'p-3'}`}
             title={t('chat.sidebar.logout')}
           >
             <LogOut className="h-5 w-5" />
