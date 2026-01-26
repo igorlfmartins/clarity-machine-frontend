@@ -86,7 +86,7 @@ export function Chat() {
     title: t('chat.session.new'),
     messages: [],
   })
-  const [selectedFocus] = useState<string | null>(null)
+  const [selectedFocus, setSelectedFocus] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingSessions, setIsLoadingSessions] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -426,7 +426,23 @@ export function Chat() {
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="p-4 bg-bio-white border-t border-bio-deep/10">
+            <div className="p-4 bg-bio-white border-t border-bio-deep/10 dark:bg-bio-deep dark:border-bio-white/10">
+              <div className="max-w-4xl mx-auto mb-4 flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                {focusAreas.map((area) => (
+                  <button
+                    key={area.id}
+                    onClick={() => setSelectedFocus(selectedFocus === area.label ? null : area.label)}
+                    className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest font-mono border transition-all whitespace-nowrap ${
+                      selectedFocus === area.label
+                        ? 'bg-bio-teal text-bio-deep border-bio-teal'
+                        : 'bg-transparent border-bio-deep/20 text-bio-deep/60 hover:border-bio-deep/50 hover:text-bio-deep dark:text-bio-white/60 dark:border-bio-white/20 dark:hover:border-bio-white/50 dark:hover:text-bio-white'
+                    }`}
+                  >
+                    {area.label}
+                  </button>
+                ))}
+              </div>
+
               <ChatInput
                 input={input}
                 setInput={setInput}
