@@ -64,7 +64,9 @@ export function LiveMode({ onClose, systemInstruction }: LiveModeProps) {
           setVolume(Math.sqrt(sum / inputData.length));
 
           // Only send if connected, not muted, and WS is open
-          if (isMuted || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
+          if (isMuted || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+             return;
+          }
 
           // Convert to PCM 16-bit
           const pcm16 = new Int16Array(inputData.length);
@@ -132,10 +134,11 @@ export function LiveMode({ onClose, systemInstruction }: LiveModeProps) {
     wsRef.current = ws;
 
     ws.onopen = () => {
+      console.log('WebSocket Connected');
       setIsConnected(true);
       setConnectionError(null);
       // Send initial setup
-      ws.send(JSON.stringify({
+      const setupMsg = {
         setup: {
           model: "models/gemini-2.0-flash-exp",
           generation_config: {
@@ -148,12 +151,15 @@ export function LiveMode({ onClose, systemInstruction }: LiveModeProps) {
             parts: [{ text: systemInstruction }]
           }
         }
-      }));
+      };
+      console.log('Sending Setup:', setupMsg);
+      ws.send(JSON.stringify(setupMsg));
     };
 
     ws.onmessage = async (event) => {
       try {
         const data = JSON.parse(event.data);
+        console.log('WS Message:', data);
         
         if (data.serverContent?.modelTurn?.parts) {
           for (const part of data.serverContent.modelTurn.parts) {
