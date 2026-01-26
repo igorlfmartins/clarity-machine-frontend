@@ -45,7 +45,7 @@ export function LiveVisualizer({ isSpeaking, volume }: LiveVisualizerProps) {
 
       ctx.beginPath();
       ctx.arc(x, y, p.baseSize, 0, Math.PI * 2);
-      ctx.fillStyle = isSpeaking ? '#38bdf8' : '#64748b';
+      ctx.fillStyle = isSpeaking ? '#00D68F' : '#D4FF33'; // bio-teal or bio-lime
       ctx.fill();
     });
 
@@ -66,10 +66,10 @@ export function LiveVisualizer({ isSpeaking, volume }: LiveVisualizerProps) {
         className="w-full max-w-[400px] h-auto"
       />
       <div className="text-center">
-        <p className="text-sky-400 font-medium tracking-widest uppercase text-xs">
+        <p className="text-bio-teal font-bold tracking-widest uppercase text-xs font-mono">
           {isSpeaking ? 'IA está falando...' : 'Ouvindo você...'}
         </p>
-        <p className="text-slate-500 text-[10px] mt-2">
+        <p className="text-bio-white/50 text-[10px] mt-2 font-mono">
           Modo Live Ativado • Conversa por Voz
         </p>
       </div>
