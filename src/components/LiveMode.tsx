@@ -1,10 +1,6 @@
-
-import { useEffect, useRef, useState } from 'react';
 import { X, Mic, MicOff } from 'lucide-react';
 import { LiveVisualizer } from './LiveVisualizer';
-
-// @ts-ignore
-import pcmProcessorUrl from '../audio-processor.js?url';
+import { useLiveAudio } from '../hooks/useLiveAudio';
 
 interface LiveModeProps {
   onClose: () => void;
@@ -12,255 +8,15 @@ interface LiveModeProps {
 }
 
 export function LiveMode({ onClose, systemInstruction }: LiveModeProps) {
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [volume, setVolume] = useState(0);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<string>('Inicializando...');
-  
-  const wsRef = useRef<WebSocket | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const workletNodeRef = useRef<AudioWorkletNode | null>(null);
-  const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const audioQueue = useRef<Int16Array[]>([]);
-  const isPlayingRef = useRef(false);
-
-  const [debugUrl, setDebugUrl] = useState<string>('');
-
-  // 1. Initialize Microphone immediately on mount
-  useEffect(() => {
-    let mounted = true;
-
-    const initMicrophone = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        if (!mounted) {
-            stream.getTracks().forEach(track => track.stop());
-            return;
-        }
-        streamRef.current = stream;
-        
-        if (!audioContextRef.current) {
-          audioContextRef.current = new AudioContext({ sampleRate: 16000 });
-        }
-
-        try {
-          await audioContextRef.current.audioWorklet.addModule(pcmProcessorUrl);
-        } catch (e) {
-          console.error("Failed to load audio worklet", e);
-        }
-
-        sourceRef.current = audioContextRef.current.createMediaStreamSource(stream);
-        workletNodeRef.current = new AudioWorkletNode(audioContextRef.current, 'pcm-processor');
-        
-        workletNodeRef.current.port.onmessage = (event) => {
-          if (!mounted) return;
-          const inputData = event.data;
-          
-          // Calculate volume for visualizer
-          let sum = 0;
-          for (let i = 0; i < inputData.length; i++) {
-            sum += inputData[i] * inputData[i];
-          }
-          setVolume(Math.sqrt(sum / inputData.length));
-
-          // Only send if connected, not muted, and WS is open
-          if (isMuted || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-             return;
-          }
-
-          // Convert to PCM 16-bit
-          const pcm16 = new Int16Array(inputData.length);
-          for (let i = 0; i < inputData.length; i++) {
-            pcm16[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7FFF;
-          }
-
-          const base64 = btoa(String.fromCharCode(...new Uint8Array(pcm16.buffer)));
-          wsRef.current.send(JSON.stringify({
-            realtime_input: {
-              media_chunks: [{
-                mime_type: "audio/pcm;rate=16000",
-                data: base64
-              }]
-            }
-          }));
-        };
-
-        sourceRef.current.connect(workletNodeRef.current);
-        workletNodeRef.current.connect(audioContextRef.current.destination);
-
-      } catch (err: any) {
-        console.error('Error accessing microphone:', err);
-        if (mounted) setConnectionStatus("Permissão de Mic Negada");
-      }
-    };
-
-    setConnectionStatus("Aguardando Microfone...");
-    initMicrophone();
-
-    return () => {
-      mounted = false;
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-      }
-      sourceRef.current?.disconnect();
-      workletNodeRef.current?.disconnect();
-    };
-  }, [isMuted]); // Re-bind if muted changes (though logical check is inside callback, this is fine)
-
-  useEffect(() => {
-    const getWebSocketUrl = () => {
-      // Force Production URL for debugging if on Railway (heuristic: hostname contains 'railway')
-      if (window.location.hostname.includes('railway.app')) {
-        return 'wss://consultoria-backend.up.railway.app/api/live';
-      }
-
-      // 1. Prioritize Runtime Env (set by Docker/Railway at runtime)
-      // @ts-ignore
-      if (window.ENV?.VITE_API_URL) {
-         // @ts-ignore
-         const url = new URL(window.ENV.VITE_API_URL);
-         const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-         return `${protocol}//${url.host}/api/live`;
-      }
-
-      // 2. Build Time Env
-      const apiUrl = import.meta.env.VITE_API_URL;
-      
-      if (apiUrl) {
-        try {
-          const url = new URL(apiUrl);
-          const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-          const host = url.host;
-          return `${protocol}//${host}/api/live`;
-        } catch {
-          let wsUrl = apiUrl.replace(/^http/, 'ws');
-          if (wsUrl.endsWith('/')) {
-            wsUrl = wsUrl.slice(0, -1);
-          }
-          return `${wsUrl}/api/live`;
-        }
-      }
-      
-      // 3. Fallback to current window host
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const host = window.location.host;
-      return `${protocol}//${host}/api/live`;
-    };
-
-    const url = getWebSocketUrl();
-    setDebugUrl(url);
-    console.log("Connecting to WS URL:", url);
-    const ws = new WebSocket(url);
-    wsRef.current = ws;
-    setConnectionStatus("Conectando ao Socket...");
-
-    ws.onopen = () => {
-      console.log('WebSocket Connected');
-      setIsConnected(true);
-      setConnectionStatus("Sistema Online");
-      // Send initial setup
-      const setupMsg = {
-        setup: {
-          model: "models/gemini-2.0-flash-exp",
-          generation_config: {
-            response_modalities: ["AUDIO"],
-            speech_config: {
-              voice_config: { prebuilt_voice_config: { voice_name: "Aoede" } }
-            }
-          },
-          system_instruction: {
-            parts: [{ text: systemInstruction }]
-          }
-        }
-      };
-      console.log('Sending Setup:', setupMsg);
-      ws.send(JSON.stringify(setupMsg));
-    };
-
-    ws.onmessage = async (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        console.log('WS Message:', data);
-        
-        if (data.serverContent?.modelTurn?.parts) {
-          for (const part of data.serverContent.modelTurn.parts) {
-            if (part.inlineData?.mimeType === 'audio/pcm;rate=16000') {
-              const base64Audio = part.inlineData.data;
-              const binaryString = atob(base64Audio);
-              const bytes = new Uint8Array(binaryString.length);
-              for (let i = 0; i < binaryString.length; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-              }
-              const pcm16 = new Int16Array(bytes.buffer);
-              audioQueue.current.push(pcm16);
-              if (!isPlayingRef.current) {
-                playNextChunk();
-              }
-            }
-          }
-        }
-      } catch (e) {
-        console.error("Error parsing websocket message", e);
-      }
-    };
-
-    ws.onerror = (error) => {
-      console.error("WebSocket Error:", error);
-      setIsConnected(false);
-      setConnectionStatus("Erro no Socket");
-    };
-
-    ws.onclose = (event) => {
-      console.log('WS Close Event:', event);
-      setIsConnected(false);
-      if (event.code === 1006) {
-        setConnectionStatus("Erro: 1006 (Abnormal)");
-      } else if (event.code === 1011) {
-        setConnectionStatus("Erro: Servidor (1011)");
-      } else {
-        setConnectionStatus(`Fechado (${event.code})`);
-      }
-    };
-
-    return () => {
-      ws.close();
-    };
-  }, [systemInstruction]);
-
-  const playNextChunk = async () => {
-    if (audioQueue.current.length === 0) {
-      isPlayingRef.current = false;
-      setIsSpeaking(false);
-      return;
-    }
-
-    isPlayingRef.current = true;
-    setIsSpeaking(true);
-    const chunk = audioQueue.current.shift()!;
-    
-    if (!audioContextRef.current) {
-      audioContextRef.current = new AudioContext({ sampleRate: 16000 });
-    }
-
-    const audioBuffer = audioContextRef.current.createBuffer(1, chunk.length, 16000);
-    const channelData = audioBuffer.getChannelData(0);
-    
-    for (let i = 0; i < chunk.length; i++) {
-      channelData[i] = chunk[i] / 32768;
-    }
-
-    const source = audioContextRef.current.createBufferSource();
-    source.buffer = audioBuffer;
-    source.connect(audioContextRef.current.destination);
-    
-    source.onended = () => {
-      playNextChunk();
-    };
-    
-    source.start();
-  };
+  const {
+    isSpeaking,
+    volume,
+    isMuted,
+    setIsMuted,
+    isConnected,
+    connectionStatus,
+    debugUrl
+  } = useLiveAudio({ systemInstruction });
 
   return (
     <div className="fixed inset-0 z-50 bg-bio-deep/95 backdrop-blur-2xl flex flex-col items-center justify-center p-6 transition-all duration-500 bg-cross-pattern font-sans">
@@ -312,13 +68,13 @@ export function LiveMode({ onClose, systemInstruction }: LiveModeProps) {
           </div>
 
           <div className="flex gap-4 w-full">
-            <div className="flex-1 h-1 bg-bio-white/10">
+            <div className="flex-1 h-1.5 bg-bio-white/10 relative overflow-hidden">
               <div 
                 className="h-full bg-bio-teal transition-all duration-300" 
                 style={{ width: isConnected ? '100%' : '30%' }} 
               />
             </div>
-            <div className="flex-1 h-1 bg-bio-white/10">
+            <div className="flex-1 h-1.5 bg-bio-white/10 relative overflow-hidden">
               <div 
                 className="h-full bg-bio-purple transition-all duration-300" 
                 style={{ width: isSpeaking ? '100%' : '0%' }} 

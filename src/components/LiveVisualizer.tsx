@@ -1,23 +1,27 @@
-
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, memo } from 'react';
 
 interface LiveVisualizerProps {
   isSpeaking: boolean;
   volume: number;
 }
 
-export function LiveVisualizer({ isSpeaking, volume }: LiveVisualizerProps) {
+export const LiveVisualizer = memo(function LiveVisualizer({ isSpeaking, volume }: LiveVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const requestRef = useRef<number>(0);
-  const particles = useRef<{ x: number; y: number; baseSize: number; angle: number; distance: number }[]>([]);
+  const stateRef = useRef({ isSpeaking, volume });
+  const particles = useRef<{ baseSize: number; angle: number; distance: number }[]>([]);
 
+  // Update refs without re-rendering
+  useEffect(() => {
+    stateRef.current = { isSpeaking, volume };
+  }, [isSpeaking, volume]);
+
+  // Initialize particles once
   useEffect(() => {
     const particleCount = 100;
     const p = [];
     for (let i = 0; i < particleCount; i++) {
       p.push({
-        x: 0,
-        y: 0,
         baseSize: Math.random() * 2 + 1,
         angle: (i / particleCount) * Math.PI * 2,
         distance: 100 + Math.random() * 20,
@@ -26,36 +30,38 @@ export function LiveVisualizer({ isSpeaking, volume }: LiveVisualizerProps) {
     particles.current = p;
   }, []);
 
-  const animate = (time: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-
-    const pulse = isSpeaking ? Math.sin(time / 200) * 10 + volume * 50 : Math.sin(time / 1000) * 5;
-
-    particles.current.forEach((p, i) => {
-      const dynamicDistance = p.distance + pulse + (isSpeaking ? Math.sin(time / 100 + i) * 5 : 0);
-      const x = centerX + Math.cos(p.angle) * dynamicDistance;
-      const y = centerY + Math.sin(p.angle) * dynamicDistance;
-
-      ctx.beginPath();
-      ctx.arc(x, y, p.baseSize, 0, Math.PI * 2);
-      ctx.fillStyle = isSpeaking ? '#00D68F' : '#D4FF33'; // bio-teal or bio-lime
-      ctx.fill();
-    });
-
-    requestRef.current = requestAnimationFrame(animate);
-  };
-
   useEffect(() => {
+    const animate = (time: number) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const { isSpeaking: speaking, volume: vol } = stateRef.current;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+
+      const pulse = speaking ? Math.sin(time / 200) * 10 + vol * 50 : Math.sin(time / 1000) * 5;
+
+      particles.current.forEach((p, i) => {
+        const dynamicDistance = p.distance + pulse + (speaking ? Math.sin(time / 100 + i) * 5 : 0);
+        const x = centerX + Math.cos(p.angle) * dynamicDistance;
+        const y = centerY + Math.sin(p.angle) * dynamicDistance;
+
+        ctx.beginPath();
+        ctx.arc(x, y, p.baseSize, 0, Math.PI * 2);
+        ctx.fillStyle = speaking ? '#00D68F' : '#D4FF33';
+        ctx.fill();
+      });
+
+      requestRef.current = requestAnimationFrame(animate);
+    };
+
     requestRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(requestRef.current);
-  }, [isSpeaking, volume]);
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-700">
@@ -75,4 +81,4 @@ export function LiveVisualizer({ isSpeaking, volume }: LiveVisualizerProps) {
       </div>
     </div>
   );
-}
+});

@@ -2,278 +2,59 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Loader2, MessageSquareMore, Target, Settings } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import { useTranslation } from 'react-i18next'
+
 import { ChatInput } from '../components/ChatInput'
 import { SettingsPanel } from '../components/SettingsPanel'
 import { Sidebar } from '../components/Sidebar'
 import { LiveMode } from '../components/LiveMode'
+
 import { useAuth } from '../auth'
-import type { ChatMessage, SessionSummary } from '../api'
-import { sendConsultoriaMessage } from '../api'
-
-const FOCUS_AREAS = (t: (key: string) => string) => [
-  { id: 'vendas', label: t('chat.focusAreas.sales'), color: 'text-emerald-400', border: 'border-emerald-500/50', bg: 'bg-emerald-500/10' },
-  { id: 'marketing', label: t('chat.focusAreas.marketing'), color: 'text-purple-400', border: 'border-purple-500/50', bg: 'bg-purple-500/10' },
-  { id: 'financas', label: t('chat.focusAreas.finance'), color: 'text-amber-400', border: 'border-amber-500/50', bg: 'bg-amber-500/10' },
-  { id: 'gestao', label: t('chat.focusAreas.management'), color: 'text-blue-400', border: 'border-blue-500/50', bg: 'bg-blue-500/10' },
-  { id: 'tecnologia', label: t('chat.focusAreas.tech'), color: 'text-indigo-400', border: 'border-indigo-500/50', bg: 'bg-indigo-500/10' },
-]
-
-const SESSIONS_KEY_PREFIX = 'consultoria_sessions_'
-const SESSION_MESSAGES_KEY_PREFIX = 'consultoria_session_messages_'
-
-function getSessionsKey(userId: string) {
-  return `${SESSIONS_KEY_PREFIX}${userId}`
-}
-
-function getMessagesKey(userId: string, sessionId: string) {
-  return `${SESSION_MESSAGES_KEY_PREFIX}${userId}_${sessionId}`
-}
-
-function loadSessionsFromStorage(userId: string): SessionSummary[] {
-  if (typeof window === 'undefined') return []
-  try {
-    const raw = window.localStorage.getItem(getSessionsKey(userId))
-    if (!raw) return []
-    const parsed = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return []
-    return parsed
-  } catch {
-    return []
-  }
-}
-
-function saveSessionsToStorage(userId: string, sessions: SessionSummary[]) {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.setItem(getSessionsKey(userId), JSON.stringify(sessions))
-  } catch {
-  }
-}
-
-function loadMessagesFromStorage(userId: string, sessionId: string): ChatMessage[] {
-  if (typeof window === 'undefined') return []
-  try {
-    const raw = window.localStorage.getItem(getMessagesKey(userId, sessionId))
-    if (!raw) return []
-    const parsed = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return []
-    return parsed
-  } catch {
-    return []
-  }
-}
-
-function saveMessagesToStorage(userId: string, sessionId: string, messages: ChatMessage[]) {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.setItem(getMessagesKey(userId, sessionId), JSON.stringify(messages))
-  } catch {
-  }
-}
-
-type SessionState = {
-  id: string | null
-  title: string
-  messages: ChatMessage[]
-}
+import { useSettings } from '../hooks/useSettings'
+import { useChatSession } from '../hooks/useChatSession'
+import { FOCUS_AREAS } from '../utils/constants'
 
 export function Chat() {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const { user, signOut } = useAuth()
-  const [sessions, setSessions] = useState<SessionSummary[]>([])
-  const [currentSession, setCurrentSession] = useState<SessionState>({
-    id: null,
-    title: t('chat.session.new'),
-    messages: [],
-  })
-  const [selectedFocus, setSelectedFocus] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isLoadingSessions, setIsLoadingSessions] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   
-  // Settings State
+  const {
+    language, setLanguage,
+    theme, setTheme,
+    toneLevel, setToneLevel
+  } = useSettings()
+
+  const {
+    sessions,
+    currentSession,
+    isLoading,
+    isLoadingSessions,
+    error,
+    handleNewSession,
+    handleSelectSession,
+    handleDeleteSession,
+    sendMessage,
+  } = useChatSession({ user, language, toneLevel, t })
+
+  const [selectedFocus, setSelectedFocus] = useState<string | null>(null)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [language, setLanguage] = useState(i18n.language)
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark')
-  const [toneLevel, setToneLevel] = useState(3)
   const [isLiveMode, setIsLiveMode] = useState(false)
+  const [input, setInput] = useState('')
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
-
   const focusAreas = useMemo(() => FOCUS_AREAS(t), [t])
 
-  // Load settings
-  useEffect(() => {
-    const savedLang = localStorage.getItem('consultoria_language') || 'en'
-    const savedTheme = (localStorage.getItem('consultoria_theme') as 'light' | 'dark') || 'dark'
-    const savedTone = parseInt(localStorage.getItem('consultoria_tone') || '1', 10)
-    setLanguage(savedLang)
-    setTheme(savedTheme)
-    setToneLevel(savedTone)
-  }, [])
-
-  // Apply theme
-  useEffect(() => {
-    const root = window.document.documentElement
-    root.classList.remove('light', 'dark')
-    root.classList.add(theme)
-    localStorage.setItem('consultoria_theme', theme)
-  }, [theme])
-
-  // Save language
-  useEffect(() => {
-    localStorage.setItem('consultoria_language', language)
-    i18n.changeLanguage(language)
-  }, [language, i18n])
-
-  // Save tone
-  useEffect(() => {
-    localStorage.setItem('consultoria_tone', toneLevel.toString())
-  }, [toneLevel])
-
-  useEffect(() => {
-    if (!user) return
-    setIsLoadingSessions(true)
-
-    const stored = loadSessionsFromStorage(user.id)
-    setSessions(stored)
-    setIsLoadingSessions(false)
-  }, [user])
-
+  // Auto-scroll to bottom
   useEffect(() => {
     if (!messagesEndRef.current) return
     messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [currentSession.messages.length])
 
-  function handleNewSession() {
-    setCurrentSession({
-      id: null,
-      title: t('chat.session.new'),
-      messages: [],
-    })
-    setError(null)
-  }
-
-  function handleSelectSession(session: SessionSummary) {
-    if (!user) return
-    const messages = loadMessagesFromStorage(user.id, session.id)
-    setCurrentSession({
-      id: session.id,
-      title: session.title,
-      messages,
-    })
-    setError(null)
-  }
-
-  function handleDeleteSession(sessionId: string, event: React.MouseEvent) {
-    event.stopPropagation()
-    if (!user) return
-
-    if (!window.confirm(t('chat.sidebar.confirmDelete'))) return
-
-    const nextSessions = sessions.filter((s) => s.id !== sessionId)
-    setSessions(nextSessions)
-    saveSessionsToStorage(user.id, nextSessions)
-    
-    // Clean up messages from storage
-    try {
-      window.localStorage.removeItem(getMessagesKey(user.id, sessionId))
-    } catch {}
-
-    if (currentSession.id === sessionId) {
-      handleNewSession()
-    }
-  }
-
-  async function sendMessage(text: string, focusOverride?: string) {
-    if (!user || !text.trim()) return
-
-    const focusToSend = focusOverride !== undefined ? focusOverride : selectedFocus
-    const now = new Date().toISOString()
-
-    const userMessage: ChatMessage = {
-      id: crypto.randomUUID(),
-      sender: 'user',
-      text,
-      createdAt: now,
-    }
-
-    setCurrentSession((prev) => ({
-      ...prev,
-      messages: [...prev.messages, userMessage],
-    }))
-    
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const result = await sendConsultoriaMessage({
-        userId: user.id,
-        conversationId: currentSession.id,
-        message: text,
-        history: currentSession.messages,
-        focus: focusToSend,
-        language: language,
-        toneLevel: toneLevel,
-      })
-
-      const aiMessage: ChatMessage = {
-        id: crypto.randomUUID(),
-        sender: 'ai',
-        text: result.reply,
-        createdAt: new Date().toISOString(),
-      }
-
-      const conversationId = result.conversationId
-      const baseMessages = [...currentSession.messages, userMessage]
-      const fullMessages = [...baseMessages, aiMessage]
-
-      setCurrentSession((prev) => ({
-        ...prev,
-        id: conversationId,
-        messages: fullMessages,
-      }))
-
-      if (user) {
-        let createdAt = now
-        let title = currentSession.title
-        const existing = sessions.find((s) => s.id === conversationId)
-        if (existing) {
-          createdAt = existing.createdAt ?? createdAt
-          title = existing.title || title
-        } else {
-          if (!title || title === t('chat.session.new')) {
-            title = text.length > 60 ? `${text.slice(0, 57)}...` : text
-          }
-        }
-
-        const summary: SessionSummary = {
-          id: conversationId,
-          title: title || t('chat.session.defaultTitle'),
-          createdAt,
-        }
-
-        setSessions((prev) => {
-          const index = prev.findIndex((s) => s.id === conversationId)
-          if (index === -1) {
-            const next = [summary, ...prev]
-            saveSessionsToStorage(user.id, next)
-            return next
-          }
-          const next = [...prev]
-          next[index] = summary
-          saveSessionsToStorage(user.id, next)
-          return next
-        })
-
-        saveMessagesToStorage(user.id, conversationId, fullMessages)
-      }
-    } catch (err: any) {
-      console.error(err)
-      setError(err.message || t('chat.body.error'))
-    } finally {
-      setIsLoading(false)
-    }
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!input.trim() || isLoading) return
+    const msg = input
+    setInput('')
+    await sendMessage(msg, selectedFocus)
   }
 
   function handleDeepDive(area: { id: string; label: string }) {
@@ -282,16 +63,6 @@ export function Chat() {
 
   function handleGenerateReport() {
     sendMessage(t('chat.footer.generateReport'))
-  }
-
-  const [input, setInput] = useState('')
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!input.trim() || isLoading) return
-    const msg = input
-    setInput('')
-    await sendMessage(msg)
   }
 
   return (
