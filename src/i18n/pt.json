@@ -16,6 +16,7 @@
       "subtitle": "Mentoria orientada por dados",
       "aiStatus": "Online",
       "aiModel": "Consultor IA",
+      "systemActive": "Sistema Ativo",
       "settings": "Ajustes"
     },
     "body": {
@@ -31,6 +32,9 @@
         "senderName": "Consultor",
         "deepDive": "Aprofundar:"
       },
+      "userInput": "ENTRADA DO USUÁRIO",
+      "systemResponse": "RESPOSTA DO SISTEMA",
+      "processing": "Processando fluxo de dados...",
       "loading": "Analisando...",
       "error": "Erro na resposta.",
       "fetchError": "Servidor offline. Verifique a conexão."
@@ -90,6 +94,12 @@
         "label": "Clareza Brutal",
         "desc": "Feedback direto, sem filtros."
       }
+    },
+    "password": {
+      "title": "Alterar Senha",
+      "placeholder": "NOVA SENHA",
+      "button": "ATUALIZAR",
+      "success": "Senha atualizada!"
     },
     "subscription": {
       "label": "Assinatura",

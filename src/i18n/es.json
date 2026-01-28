@@ -16,6 +16,7 @@
       "subtitle": "Mentoría basada en datos",
       "aiStatus": "En línea",
       "aiModel": "Consultor IA",
+      "systemActive": "Sistema Activo",
       "settings": "Ajustes"
     },
     "body": {
@@ -31,6 +32,9 @@
         "senderName": "Consultor",
         "deepDive": "Profundizar:"
       },
+      "userInput": "ENTRADA DE USUARIO",
+      "systemResponse": "RESPUESTA DEL SISTEMA",
+      "processing": "Procesando flujo de datos...",
       "loading": "Analizando...",
       "error": "Error en la respuesta.",
       "fetchError": "Servidor desconectado. Verifique conexión."
@@ -90,6 +94,12 @@
         "label": "Claridad Brutal",
         "desc": "Feedback directo, sin filtros."
       }
+    },
+    "password": {
+      "title": "Cambiar Contraseña",
+      "placeholder": "NUEVA CONTRASEÑA",
+      "button": "ACTUALIZAR",
+      "success": "¡Contraseña actualizada!"
     },
     "subscription": {
       "label": "Suscripción",

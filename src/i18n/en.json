@@ -16,6 +16,7 @@
       "subtitle": "Data-driven mentoring",
       "aiStatus": "Online",
       "aiModel": "AI Consultant",
+      "systemActive": "System Active",
       "settings": "Settings"
     },
     "body": {
@@ -31,6 +32,9 @@
         "senderName": "Consultant",
         "deepDive": "Deep dive:"
       },
+      "userInput": "USER INPUT",
+      "systemResponse": "SYSTEM RESPONSE",
+      "processing": "Processing Data Stream...",
       "loading": "Analyzing...",
       "error": "Response error.",
       "fetchError": "Server offline. Check connection."
@@ -90,6 +94,12 @@
         "label": "Brutal Clarity",
         "desc": "Direct, unfiltered feedback."
       }
+    },
+    "password": {
+      "title": "Change Password",
+      "placeholder": "NEW PASSWORD",
+      "button": "UPDATE",
+      "success": "Password updated!"
     },
     "subscription": {
       "label": "Subscription",

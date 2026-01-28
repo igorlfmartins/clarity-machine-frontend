@@ -146,12 +146,12 @@ export function SettingsPanel({
         {/* Password Update Section */}
         <div className="pt-8 border-t border-bio-deep/10 dark:border-bio-white/10 space-y-4">
           <label className="text-[10px] font-bold text-bio-deep/50 dark:text-bio-white/50 uppercase tracking-widest font-mono">
-            Alterar Senha
+            {t('settings.password.title')}
           </label>
           <div className="space-y-3">
             <input
               type="password"
-              placeholder="NOVA SENHA"
+              placeholder={t('settings.password.placeholder')}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               className="input-base border-bio-deep/10 bg-bio-deep/5 text-bio-deep placeholder:text-bio-deep/30 dark:border-bio-white/10 dark:bg-bio-white/5 dark:text-bio-white dark:placeholder:text-bio-white/30"
@@ -161,10 +161,10 @@ export function SettingsPanel({
               disabled={passwordStatus === 'saving' || !newPassword}
               className="w-full bg-bio-deep dark:bg-bio-white text-bio-lime dark:text-bio-deep font-mono font-bold py-3 uppercase tracking-widest hover:bg-opacity-90 transition-colors disabled:opacity-50"
             >
-              {passwordStatus === 'saving' ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'ATUALIZAR'}
+              {passwordStatus === 'saving' ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : t('settings.password.button')}
             </button>
             {passwordStatus === 'success' && (
-              <p className="text-[10px] text-bio-teal font-bold uppercase tracking-widest text-center font-mono">Senha atualizada!</p>
+              <p className="text-[10px] text-bio-teal font-bold uppercase tracking-widest text-center font-mono">{t('settings.password.success')}</p>
             )}
           </div>
         </div>
