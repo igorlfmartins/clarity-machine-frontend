@@ -15,7 +15,7 @@ import { FOCUS_AREAS } from '../utils/constants'
 
 export function Chat() {
   const { t } = useTranslation()
-  const { user, signOut } = useAuth()
+  const { user, session, signOut } = useAuth()
   
   const {
     language, setLanguage,
@@ -33,7 +33,7 @@ export function Chat() {
     handleSelectSession,
     handleDeleteSession,
     sendMessage,
-  } = useChatSession({ user, language, toneLevel, t })
+  } = useChatSession({ user, session, language, toneLevel, t })
 
   const [selectedFocus, setSelectedFocus] = useState<string | null>(null)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
@@ -235,6 +235,7 @@ export function Chat() {
             <LiveMode 
               onClose={() => setIsLiveMode(false)}
               systemInstruction={t('chat.header.aiStatus')}
+              token={session?.access_token}
             />
           )}
 

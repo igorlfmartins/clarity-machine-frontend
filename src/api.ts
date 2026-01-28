@@ -27,6 +27,7 @@ export async function sendConsultoriaMessage(params: {
   focus?: string | null
   language?: string
   toneLevel?: number
+  token?: string
 }): Promise<ChatResponse> {
   // Converte histórico para o formato do Gemini (se necessário pelo backend)
   // O backend espera { message, history: [{ role: 'user'|'model', parts: [{ text: '...' }] }] }
@@ -35,12 +36,18 @@ export async function sendConsultoriaMessage(params: {
     parts: [{ text: msg.text }]
   }));
 
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    'x-api-key': CLIENT_API_KEY,
+  };
+
+  if (params.token) {
+    headers['Authorization'] = `Bearer ${params.token}`;
+  }
+
   const response = await fetch(API_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': CLIENT_API_KEY,
-    },
+    headers,
     body: JSON.stringify({
       message: params.message,
       history: formattedHistory,

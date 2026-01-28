@@ -15,6 +15,7 @@ interface User {
 
 interface UseChatSessionProps {
   user: User | null;
+  session?: { access_token: string } | null;
   language: string;
   toneLevel: number;
   t: (key: string) => string;
@@ -26,7 +27,7 @@ export type SessionState = {
   messages: ChatMessage[];
 };
 
-export function useChatSession({ user, language, toneLevel, t }: UseChatSessionProps) {
+export function useChatSession({ user, session, language, toneLevel, t }: UseChatSessionProps) {
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [currentSession, setCurrentSession] = useState<SessionState>({
     id: null,
@@ -113,6 +114,7 @@ export function useChatSession({ user, language, toneLevel, t }: UseChatSessionP
         focus: focusToSend,
         language: language,
         toneLevel: toneLevel,
+        token: session?.access_token,
       });
 
       const aiMessage: ChatMessage = {
@@ -170,7 +172,7 @@ export function useChatSession({ user, language, toneLevel, t }: UseChatSessionP
     } finally {
       setIsLoading(false);
     }
-  }, [user, currentSession, sessions, language, toneLevel, t]);
+  }, [user, session, currentSession, sessions, language, toneLevel, t]);
 
   return {
     sessions,

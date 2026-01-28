@@ -5,9 +5,10 @@ import { useLiveAudio } from '../hooks/useLiveAudio';
 interface LiveModeProps {
   onClose: () => void;
   systemInstruction: string;
+  token?: string;
 }
 
-export function LiveMode({ onClose, systemInstruction }: LiveModeProps) {
+export function LiveMode({ onClose, systemInstruction, token }: LiveModeProps) {
   const {
     isSpeaking,
     volume,
@@ -16,7 +17,7 @@ export function LiveMode({ onClose, systemInstruction }: LiveModeProps) {
     isConnected,
     connectionStatus,
     debugUrl
-  } = useLiveAudio({ systemInstruction });
+  } = useLiveAudio({ systemInstruction, token });
 
   return (
     <div className="fixed inset-0 z-50 bg-bio-deep/95 backdrop-blur-2xl flex flex-col items-center justify-center p-6 transition-all duration-500 bg-cross-pattern font-sans">

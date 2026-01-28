@@ -5,9 +5,10 @@ import pcmProcessorUrl from '../audio-processor.js?url';
 
 interface UseLiveAudioProps {
   systemInstruction: string;
+  token?: string;
 }
 
-export function useLiveAudio({ systemInstruction }: UseLiveAudioProps) {
+export function useLiveAudio({ systemInstruction, token }: UseLiveAudioProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [volume, setVolume] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
@@ -173,33 +174,35 @@ export function useLiveAudio({ systemInstruction }: UseLiveAudioProps) {
   // WebSocket Connection
   useEffect(() => {
     const getWebSocketUrl = () => {
+      let baseUrl = '';
       if (window.location.hostname.includes('railway.app')) {
-        return 'wss://consultoria-backend.up.railway.app/api/live';
-      }
-
-      // @ts-ignore
-      if (window.ENV?.VITE_API_URL) {
-         // @ts-ignore
-         const url = new URL(window.ENV.VITE_API_URL);
+        baseUrl = 'wss://consultoria-backend.up.railway.app/api/live';
+      } else if ((window as any).ENV?.VITE_API_URL) {
+         const url = new URL((window as any).ENV.VITE_API_URL);
          const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-         return `${protocol}//${url.host}/api/live`;
-      }
-
-      const apiUrl = import.meta.env.VITE_API_URL;
-      if (apiUrl) {
-        try {
-          const url = new URL(apiUrl);
-          const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-          return `${protocol}//${url.host}/api/live`;
-        } catch {
-          let wsUrl = apiUrl.replace(/^http/, 'ws');
-          if (wsUrl.endsWith('/')) wsUrl = wsUrl.slice(0, -1);
-          return `${wsUrl}/api/live`;
+         baseUrl = `${protocol}//${url.host}/api/live`;
+      } else {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        if (apiUrl) {
+          try {
+            const url = new URL(apiUrl);
+            const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+            baseUrl = `${protocol}//${url.host}/api/live`;
+          } catch {
+            let wsUrl = apiUrl.replace(/^http/, 'ws');
+            if (wsUrl.endsWith('/')) wsUrl = wsUrl.slice(0, -1);
+            baseUrl = `${wsUrl}/api/live`;
+          }
+        } else {
+          const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+          baseUrl = `${protocol}//${window.location.host}/api/live`;
         }
       }
-      
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      return `${protocol}//${window.location.host}/api/live`;
+
+      if (token) {
+        return `${baseUrl}?token=${encodeURIComponent(token)}`;
+      }
+      return baseUrl;
     };
 
     const url = getWebSocketUrl();
@@ -259,7 +262,7 @@ export function useLiveAudio({ systemInstruction }: UseLiveAudioProps) {
     };
 
     return () => ws.close();
-  }, [systemInstruction, handleAudioChunk, stopAudioPlayback]);
+  }, [systemInstruction, handleAudioChunk, stopAudioPlayback, token]);
 
   return {
     isSpeaking,
