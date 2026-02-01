@@ -1,0 +1,127 @@
+{
+  "chat": {
+    "sidebar": {
+      "header": "Plataforma de consultoría de IA",
+      "subHeader": "Estrategia",
+      "newSessionButton": "Nueva Sesión",
+      "history": "Historial",
+      "emptyHistory": "Sin sesiones previas",
+      "deleteConversation": "Eliminar",
+      "confirmDelete": "¿Eliminar conversación?",
+      "userAccessLevel": "Corporativo",
+      "logout": "Salir"
+    },
+    "header": {
+      "title": "Máquina de Claridad",
+      "subtitle": "Plataforma de consultoría de IA",
+      "aiStatus": "En línea",
+      "aiModel": "Consultor IA",
+      "systemActive": "Plataforma de Consultoría de IA",
+      "settings": "Ajustes"
+    },
+    "body": {
+      "initialBriefing": {
+        "title": "Briefing",
+        "heading": "¿Cómo puedo ayudar?",
+        "paragraph": "Describa su desafío, objetivo o contexto actual.",
+        "example1": "Análisis SaaS B2B",
+        "example2": "Estrategia de Ingresos",
+        "example3": "Expansión de Mercado"
+      },
+      "aiMessage": {
+        "senderName": "Consultor",
+        "deepDive": "Profundizar:"
+      },
+      "userInput": "USUARIO",
+      "systemResponse": "RESPUESTA DEL SISTEMA",
+      "processing": "Procesando flujo de datos...",
+      "loading": "Analizando...",
+      "error": "Error en la respuesta.",
+      "fetchError": "Servidor desconectado. Verifique conexión."
+    },
+    "footer": {
+      "focusGeneral": "General",
+      "generateReport": "Informe",
+      "generateReportTooltip": "Generar Informe Completo",
+      "inputPlaceholder": "Describa su desafío...",
+      "textareaPlaceholder": "Escriba su mensaje...",
+      "send": "Enviar",
+      "disclaimer": "La IA puede cometer errores. Verifique info crítica.",
+      "integratedView": "Visión General"
+    },
+    "session": {
+      "new": "Nueva sesión",
+      "defaultTitle": "Sesión"
+    },
+    "focusAreas": {
+      "sales": "Ventas",
+      "marketing": "Marketing",
+      "finance": "Finanzas",
+      "management": "Estrategia y Gestión",
+      "tech": "Tecnología"
+    }
+  },
+  "login": {
+    "appTitle": "Plataforma de Consultoría de IA",
+    "heroTitle": "Máquina de Claridad",
+    "title": "Portal de Consultoría Estratégica",
+    "subtitle": "Ingrese su correo electrónico para acceder a su cuenta",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "tu@email.com",
+      "passwordLabel": "Contraseña",
+      "passwordPlaceholder": "••••••••",
+      "welcome": "ENTRAR",
+      "access": "ACCESO",
+      "createAccount": "CREAR CUENTA",
+      "fillDetails": "Complete sus datos",
+      "credentials": "Credenciales de acceso",
+      "registerButton": "REGISTRARSE",
+      "loginButton": "INICIAR SESIÓN",
+      "magicLinkSent": "ENVIADO",
+      "noPassword": "Sin contraseña",
+      "createAccountLink": "Crear cuenta",
+      "back": "Volver",
+      "secureEnv": "Entorno Seguro v2.0",
+      "submit": "Enviar Enlace de Acceso",
+    "footer": "Este es un entorno de consultoría estratégica impulsado por IA. No comparta información confidencial sin autorización."
+  },
+  "settings": {
+    "title": "Configuración",
+    "language": {
+      "label": "Idioma"
+    },
+    "theme": {
+      "label": "Apariencia",
+      "light": "Claro",
+      "dark": "Oscuro"
+    },
+    "tone": {
+      "label": "Tono de la IA",
+      "level1": {
+        "label": "Coach",
+        "desc": "Respuestas empáticas y motivadoras."
+      },
+      "level2": {
+        "label": "Socrático",
+        "desc": "Preguntas que desafían suposiciones."
+      },
+      "level3": {
+        "label": "Claridad Brutal",
+        "desc": "Feedback directo, sin filtros."
+      }
+    },
+    "password": {
+      "title": "Cambiar Contraseña",
+      "placeholder": "NUEVA CONTRASEÑA",
+      "button": "ACTUALIZAR",
+      "success": "¡Contraseña actualizada!"
+    },
+    "subscription": {
+      "label": "Suscripción",
+      "manage": "Gestionar Suscripción"
+    },
+    "logout": {
+      "label": "Cerrar Sesión"
+    }
+  }
+}

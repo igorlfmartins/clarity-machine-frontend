@@ -1,0 +1,89 @@
+const RAW_API_URL = import.meta.env.VITE_API_URL
+const API_URL = (() => {
+  if (!RAW_API_URL) return 'http://localhost:3000/api/consultoria'
+  const trimmed = RAW_API_URL.trim()
+  if (!trimmed) return 'http://localhost:3000/api/consultoria'
+  if (/\/api\/consultoria\/?$/.test(trimmed)) return trimmed
+  const withoutTrailingSlash = trimmed.endsWith('/') ? trimmed.slice(0, -1) : trimmed
+  if (/\/api$/.test(withoutTrailingSlash)) return `${withoutTrailingSlash}/consultoria`
+  return `${withoutTrailingSlash}/api/consultoria`
+})()
+const CLIENT_API_KEY = import.meta.env.VITE_CLIENT_API_KEY || ''
+
+export type SessionSummary = {
+  id: string
+  title: string
+  createdAt?: string
+}
+
+export type ChatMessage = {
+  id: string
+  sender: 'user' | 'ai'
+  text: string
+  createdAt: string
+}
+
+export type ChatResponse = {
+  conversationId: string
+  reply: string
+}
+
+export async function sendConsultoriaMessage(params: {
+  userId: string
+  conversationId: string | null
+  message: string
+  history?: ChatMessage[]
+  focus?: string | null
+  language?: string
+  toneLevel?: number
+  token?: string
+}): Promise<ChatResponse> {
+  // Converte histórico para o formato do Gemini (se necessário pelo backend)
+  // O backend espera { message, history: [{ role: 'user'|'model', parts: [{ text: '...' }] }] }
+  const formattedHistory = (params.history || []).map(msg => ({
+    role: msg.sender === 'user' ? 'user' : 'model',
+    parts: [{ text: msg.text }]
+  }));
+
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    'x-api-key': CLIENT_API_KEY,
+  };
+
+  if (params.token) {
+    headers['Authorization'] = `Bearer ${params.token}`;
+  }
+
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      message: params.message,
+      history: formattedHistory,
+      focus: params.focus || undefined,
+      language: params.language,
+      toneLevel: params.toneLevel,
+    }),
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const errorMessage = typeof errorData.error === 'object' 
+      ? JSON.stringify(errorData.error, null, 2) 
+      : (errorData.reply || errorData.error);
+    throw new Error(errorMessage || 'Falha ao comunicar com o serviço de consultoria');
+  }
+
+  const data = await response.json()
+
+  return {
+    conversationId: params.conversationId ?? crypto.randomUUID(),
+    reply: data.reply || 'Sem resposta do consultor.',
+  }
+}
+
+export async function fetchSessions(_userId: string): Promise<SessionSummary[]> {
+  // Como removemos o banco de dados do Make, por enquanto retornamos vazio
+  // Futuramente, isso pode ser conectado a um Supabase/Postgres
+  return []
+}

@@ -1,0 +1,127 @@
+{
+  "chat": {
+    "sidebar": {
+      "header": "Plataforma de Consultoria em IA",
+      "subHeader": "Estratégia",
+      "newSessionButton": "Nova Sessão",
+      "history": "Histórico",
+      "emptyHistory": "Nenhuma sessão anterior",
+      "deleteConversation": "Excluir",
+      "confirmDelete": "Excluir conversa?",
+      "userAccessLevel": "Corporativo",
+      "logout": "Sair"
+    },
+    "header": {
+      "title": "Máquina de Clareza",
+      "subtitle": "Plataforma de Consultoria em IA",
+      "aiStatus": "Online",
+      "aiModel": "Consultor IA",
+      "systemActive": "Plataforma de Consultoria em IA",
+      "settings": "Ajustes"
+    },
+    "body": {
+      "initialBriefing": {
+        "title": "Briefing",
+        "heading": "Como posso ajudar hoje?",
+        "paragraph": "Descreva seu desafio, objetivo ou contexto atual.",
+        "example1": "Análise de SaaS B2B",
+        "example2": "Estratégia de Receita",
+        "example3": "Expansão de Mercado"
+      },
+      "aiMessage": {
+        "senderName": "Consultor",
+        "deepDive": "Aprofundar:"
+      },
+      "userInput": "USUÁRIO",
+      "systemResponse": "RESPOSTA DO SISTEMA",
+      "processing": "Processando fluxo de dados...",
+      "loading": "Analisando...",
+      "error": "Erro na resposta.",
+      "fetchError": "Servidor offline. Verifique a conexão."
+    },
+    "footer": {
+      "focusGeneral": "Geral",
+      "generateReport": "Relatório",
+      "generateReportTooltip": "Gerar Relatório Completo",
+      "inputPlaceholder": "Descreva seu desafio...",
+      "textareaPlaceholder": "Digite sua mensagem...",
+      "send": "Enviar",
+      "disclaimer": "IA pode cometer erros. Verifique informações críticas.",
+      "integratedView": "Visão Geral"
+    },
+    "session": {
+      "new": "Nova sessão",
+      "defaultTitle": "Sessão"
+    },
+    "focusAreas": {
+      "sales": "Vendas",
+      "marketing": "Marketing",
+      "finance": "Finanças",
+      "management": "Estratégia & Gestão",
+      "tech": "Tecnologia"
+    }
+  },
+  "login": {
+    "appTitle": "Plataforma de Consultoria em IA",
+    "heroTitle": "Máquina de Clareza",
+    "title": "Portal de Consultoria Estratégica",
+    "subtitle": "Entre com seu e-mail para acessar sua conta",
+    "emailLabel": "E-mail",
+    "emailPlaceholder": "seu@email.com",
+    "passwordLabel": "Senha",
+    "passwordPlaceholder": "••••••••",
+    "welcome": "ENTRAR",
+    "access": "ACESSO",
+    "createAccount": "CRIAR CONTA",
+    "fillDetails": "Preencha seus dados",
+    "credentials": "Credenciais de acesso",
+    "registerButton": "REGISTRAR",
+    "loginButton": "INICIAR SESSÃO",
+    "magicLinkSent": "ENVIADO",
+    "noPassword": "Sem senha",
+    "createAccountLink": "Criar conta",
+    "back": "Voltar",
+    "secureEnv": "Ambiente Seguro v2.0",
+    "submit": "Enviar Link de Acesso",
+    "footer": "Este é um ambiente de consultoria estratégica alimentado por IA. Não compartilhe informações confidenciais sem autorização."
+  },
+  "settings": {
+    "title": "Configurações",
+    "language": {
+      "label": "Idioma"
+    },
+    "theme": {
+      "label": "Aparência",
+      "light": "Claro",
+      "dark": "Escuro"
+    },
+    "tone": {
+      "label": "Tom da IA",
+      "level1": {
+        "label": "Coach",
+        "desc": "Respostas empáticas e motivacionais."
+      },
+      "level2": {
+        "label": "Socrático",
+        "desc": "Perguntas que desafiam suposições."
+      },
+      "level3": {
+        "label": "Clareza Brutal",
+        "desc": "Feedback direto, sem filtros."
+      }
+    },
+    "password": {
+      "title": "Alterar Senha",
+      "placeholder": "NOVA SENHA",
+      "button": "ATUALIZAR",
+      "success": "Senha atualizada!"
+    },
+    "subscription": {
+      "label": "Assinatura",
+      "manage": "Gerenciar Assinatura"
+    },
+    "logout": {
+      "label": "Sair"
+    }
+  }
+}
