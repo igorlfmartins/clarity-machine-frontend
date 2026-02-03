@@ -13,6 +13,17 @@ export function EmptyState() {
           <h2 className="text-3xl md:text-4xl font-bold text-bio-deep dark:text-bio-white font-mono leading-tight">
             {t('chat.body.initialBriefing.heading')}
           </h2>
+          <div className="mt-6 space-y-2">
+            <p className="text-sm md:text-base text-bio-deep/80 dark:text-bio-white/80 font-mono">
+              {t('chat.body.initialBriefing.steps.1')}
+            </p>
+            <p className="text-sm md:text-base text-bio-deep/80 dark:text-bio-white/80 font-mono">
+              {t('chat.body.initialBriefing.steps.2')}
+            </p>
+            <p className="text-sm md:text-base text-bio-deep/80 dark:text-bio-white/80 font-mono">
+              {t('chat.body.initialBriefing.steps.3')}
+            </p>
+          </div>
         </div>
       </div>
     </div>

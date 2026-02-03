@@ -37,7 +37,7 @@ export function Login() {
           setMessage({ type: 'error', text: error.message || 'Erro ao criar conta.' })
         } else {
            if (data?.user && !data.session) {
-              setMessage({ type: 'success', text: 'Conta criada! Verifique seu e-mail para confirmar.' })
+              setMessage({ type: 'success', text: t('login.signupCheckEmail') })
            } else {
               // Auto logged in
            }
@@ -125,7 +125,7 @@ export function Login() {
                   </p>
                 </div>
 
-                {message && (
+               {message && !(mode === 'signup' && message.type === 'success') && (
                   <div className={`p-4 font-mono text-xs font-bold border-l-4 ${
                     message.type === 'success' ? 'bg-bio-lime/20 border-bio-lime text-bio-deep' : 'bg-bio-deep/10 border-bio-deep text-bio-deep'
                   }`}>
@@ -169,13 +169,18 @@ export function Login() {
                     {mode === 'signup' ? t('login.registerButton') : (mode === 'magic_link' && message?.type === 'success' ? t('login.magicLinkSent') : t('login.loginButton'))}
                     {!loading && <ArrowRight className="h-5 w-5" />}
                   </button>
+                  {mode === 'signup' && message?.type === 'success' && (
+                    <p className="text-xs font-mono font-bold text-bio-deep/80 uppercase tracking-wider">
+                      {t('login.signupCheckEmail')}
+                    </p>
+                  )}
                 </form>
 
                 <div className="flex gap-4 pt-4 border-t border-bio-deep/10">
                    {mode === 'password' && (
                      <>
-                       <button onClick={() => setMode('magic_link')} className="text-[10px] font-mono font-bold uppercase text-bio-deep/60 hover:text-bio-deep">{t('login.noPassword')}</button>
-                       <button onClick={() => setMode('signup')} className="text-[10px] font-mono font-bold uppercase text-bio-deep/60 hover:text-bio-deep ml-auto">{t('login.createAccountLink')}</button>
+                      <button onClick={() => setMode('magic_link')} className="text-xs font-mono font-bold uppercase text-bio-deep hover:text-bio-deep bg-bio-deep/5 hover:bg-bio-deep/10 px-3 py-2 border border-bio-deep/20">{t('login.noPassword')}</button>
+                      <button onClick={() => setMode('signup')} className="text-xs font-mono font-bold uppercase text-bio-deep hover:text-bio-deep bg-bio-deep/5 hover:bg-bio-deep/10 px-3 py-2 border border-bio-deep/20 ml-auto">{t('login.createAccountLink')}</button>
                      </>
                    )}
                    {mode !== 'password' && (

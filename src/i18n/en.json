@@ -23,6 +23,11 @@
       "initialBriefing": {
         "title": "Briefing",
         "heading": "How can I help?",
+        "steps": {
+          "1": "1. Unload: drop the problem and mental chaos here.",
+          "2": "2. Diagnose: AI cuts the noise and shows what’s costing you.",
+          "3": "3. Direct: leave with a lean plan and next steps."
+        },
         "paragraph": "Describe your challenge, goal, or current context.",
         "example1": "SaaS B2B Analysis",
         "example2": "Revenue Strategy",
@@ -78,6 +83,7 @@
       "registerButton": "REGISTER",
       "loginButton": "SIGN IN",
       "magicLinkSent": "SENT",
+      "signupCheckEmail": "Account created. Check your email to confirm.",
       "noPassword": "No password",
       "createAccountLink": "Create account",
       "back": "Back",

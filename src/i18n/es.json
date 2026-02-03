@@ -23,6 +23,11 @@
       "initialBriefing": {
         "title": "Briefing",
         "heading": "¿Cómo puedo ayudar?",
+        "steps": {
+          "1": "1. Descarga: coloca aquí el problema y el caos mental.",
+          "2": "2. Diagnostica: la IA corta el ruido y muestra lo que cuesta caro.",
+          "3": "3. Enfoca: sal con un plan corto y los próximos pasos."
+        },
         "paragraph": "Describa su desafío, objetivo o contexto actual.",
         "example1": "Análisis SaaS B2B",
         "example2": "Estrategia de Ingresos",
@@ -78,6 +83,7 @@
       "registerButton": "REGISTRARSE",
       "loginButton": "INICIAR SESIÓN",
       "magicLinkSent": "ENVIADO",
+      "signupCheckEmail": "Cuenta creada. Revisa tu correo para confirmar.",
       "noPassword": "Sin contraseña",
       "createAccountLink": "Crear cuenta",
       "back": "Volver",
