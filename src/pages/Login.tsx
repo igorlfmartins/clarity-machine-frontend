@@ -93,10 +93,6 @@ export function Login() {
         {/* Left Block: Hero / Branding */}
         <div className="bg-bio-purple relative flex flex-col justify-between p-8 lg:p-16 overflow-hidden group">
            <div className="z-10">
-             <div className="flex items-center gap-3 mb-8">
-               <div className="w-4 h-4 bg-bio-lime" />
-              <span className="font-mono text-xs font-bold uppercase tracking-widest text-bio-deep">{t('login.appTitle')}</span>
-             </div>
              <h1 className="font-mono text-5xl lg:text-7xl font-bold text-bio-deep leading-tight tracking-tight">
               {t('login.heroTitle')}
             </h1>
