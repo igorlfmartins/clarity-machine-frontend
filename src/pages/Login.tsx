@@ -6,7 +6,7 @@ import { useAuth } from '../auth'
 
 export function Login() {
   const { t, i18n } = useTranslation()
-  const { signInWithEmail, signInWithPassword, signUp } = useAuth()
+  const { signInWithEmail, signInWithPassword, signUp, resendSignUp } = useAuth()
   const [mode, setMode] = useState<'password' | 'magic_link' | 'signup'>('password')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -54,6 +54,28 @@ export function Login() {
     } catch (err: any) {
       console.error('Unexpected error:', err)
       setMessage({ type: 'error', text: err?.message || 'Erro inesperado. Tente novamente.' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleResend() {
+    if (!email.trim()) return
+    setLoading(true)
+    setMessage(null)
+    try {
+      const { error } = await resendSignUp(email)
+      if (error) {
+        console.error('Resend error:', error)
+        // If the user is already confirmed, Supabase might return an error or just send a recovery email.
+        // We can handle specific errors here if needed.
+        setMessage({ type: 'error', text: error.message || t('login.resendError') })
+      } else {
+        setMessage({ type: 'success', text: t('login.resendSuccess') })
+      }
+    } catch (err: any) {
+      console.error('Unexpected error:', err)
+      setMessage({ type: 'error', text: t('login.resendError') })
     } finally {
       setLoading(false)
     }
@@ -173,6 +195,16 @@ export function Login() {
                     <p className="text-xs font-mono font-bold text-bio-deep/80 uppercase tracking-wider">
                       {t('login.signupCheckEmail')}
                     </p>
+                  )}
+                  {mode === 'signup' && (
+                    <button 
+                      type="button"
+                      onClick={handleResend}
+                      disabled={loading || !email}
+                      className="block w-full text-center text-[10px] font-mono font-bold uppercase text-bio-deep/60 hover:text-bio-deep underline mt-2"
+                    >
+                      {t('login.resendEmail')}
+                    </button>
                   )}
                 </form>
 
