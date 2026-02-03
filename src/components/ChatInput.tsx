@@ -1,16 +1,15 @@
 import { useRef, useEffect, type FormEvent, type KeyboardEvent } from 'react'
-import { Loader2, Send, Mic } from 'lucide-react'
+import { Loader2, Send } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 interface ChatInputProps {
   input: string
   setInput: (value: string) => void
   onSubmit: (e: FormEvent) => void
-  onToggleLive: () => void
   isLoading: boolean
 }
 
-export function ChatInput({ input, setInput, onSubmit, onToggleLive, isLoading }: ChatInputProps) {
+export function ChatInput({ input, setInput, onSubmit, isLoading }: ChatInputProps) {
   const { t } = useTranslation()
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -62,8 +61,6 @@ export function ChatInput({ input, setInput, onSubmit, onToggleLive, isLoading }
             {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             <span className="ml-2 uppercase tracking-wide">{t('chat.footer.send')}</span>
           </button>
-
-          {/* Live Mode button removed temporarily */}
         </div>
       </div>
       <div className="flex items-center gap-4">

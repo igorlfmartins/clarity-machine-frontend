@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { ChatInput } from '../components/ChatInput'
 import { SettingsPanel } from '../components/SettingsPanel'
 import { Sidebar } from '../components/Sidebar'
-import { LiveMode } from '../components/LiveMode'
 import { ChatHeader } from '../components/Chat/ChatHeader'
 import { MessageList } from '../components/Chat/MessageList'
 import { EmptyState } from '../components/Chat/EmptyState'
@@ -38,7 +37,6 @@ export function Chat() {
 
   const [selectedFocus, setSelectedFocus] = useState<string | null>(null)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [isLiveMode, setIsLiveMode] = useState(false)
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const [input, setInput] = useState('')
 
@@ -130,19 +128,10 @@ export function Chat() {
                   setInput={setInput}
                   isLoading={isLoading}
                   onSubmit={handleSubmit}
-                  onToggleLive={() => setIsLiveMode(true)}
                 />
               </div>
             </div>
           </section>
-
-          {isLiveMode && (
-            <LiveMode 
-              onClose={() => setIsLiveMode(false)}
-              systemInstruction={t('chat.header.aiStatus')}
-              token={session?.access_token}
-            />
-          )}
 
           <SettingsPanel
             isOpen={isSettingsOpen}
