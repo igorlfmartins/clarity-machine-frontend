@@ -16,7 +16,25 @@ const API_BASE_URL = (() => {
 const CONSULTORIA_URL = `${API_BASE_URL}/consultoria`
 const CLIENT_API_KEY = import.meta.env.VITE_CLIENT_API_KEY || ''
 
-
+const extractErrorMessage = (value: unknown): string | null => {
+  if (!value) return null
+  if (typeof value === 'string') return value
+  if (typeof value === 'object') {
+    const record = value as Record<string, unknown>
+    if (typeof record.message === 'string') return record.message
+    // Handle Zod formatted errors
+    if (record._errors && Array.isArray(record._errors) && record._errors.length > 0) {
+      return record._errors[0] as string
+    }
+    // Recursive search in values
+    for (const key in record) {
+      if (key === '_errors') continue
+      const childMsg = extractErrorMessage(record[key])
+      if (childMsg) return childMsg
+    }
+  }
+  return null
+}
 
 export type SessionSummary = {
   id: string
@@ -95,10 +113,13 @@ export async function sendConsultoriaMessage(params: {
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     console.error('API Error Response:', errorData);
-    const errorMessage = typeof errorData.error === 'object' 
-      ? JSON.stringify(errorData.error, null, 2) 
-      : (errorData.reply || errorData.error);
-    throw new Error(errorMessage || 'Falha ao comunicar com o serviço de consultoria');
+    
+    const errorMessage = extractErrorMessage(errorData.error) 
+      || extractErrorMessage(errorData)
+      || (typeof errorData.reply === 'string' ? errorData.reply : null)
+      || 'Falha ao comunicar com o serviço de consultoria';
+
+    throw new Error(errorMessage);
   }
 
   const data = await response.json()
