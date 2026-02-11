@@ -103,14 +103,16 @@ export function useChatSession({ user, session, language, toneLevel, t }: UseCha
     }
   }, [user, session?.access_token, currentSession.id, handleNewSession, t]);
 
-  const sendMessage = useCallback(async (text: string, focusToSend?: string | null) => {
-    if (!user || !text.trim()) return;
+  const sendMessage = useCallback(async (text: string, focusToSend?: string | null, file?: File | null) => {
+    if (!user || (!text.trim() && !file)) return;
+    const finalText = text.trim().length > 0 ? text : `Arquivo anexado: ${file?.name ?? 'arquivo'}`;
+    const displayText = file ? `[Arquivo: ${file.name}] ${finalText}` : finalText;
 
     const now = new Date().toISOString();
     const userMessage: ChatMessage = {
       id: crypto.randomUUID(), // Temporary ID
       sender: 'user',
-      text,
+      text: displayText,
       createdAt: now,
     };
 
@@ -127,12 +129,13 @@ export function useChatSession({ user, session, language, toneLevel, t }: UseCha
       const result = await sendConsultoriaMessage({
         userId: user.id,
         conversationId: currentSession.id,
-        message: text,
+        message: finalText,
         history: currentSession.messages,
         focus: focusToSend,
         language: language,
         toneLevel: toneLevel,
         token: session?.access_token,
+        file: file,
       });
 
       const aiMessage: ChatMessage = {
@@ -161,7 +164,7 @@ export function useChatSession({ user, session, language, toneLevel, t }: UseCha
 
       // Update session list if it was a new session
       if (!currentSession.id) {
-        const title = text.length > 60 ? `${text.slice(0, 57)}...` : text;
+        const title = finalText.length > 60 ? `${finalText.slice(0, 57)}...` : finalText;
         const newSummary: SessionSummary = {
           id: conversationId,
           title: title, // Backend generates title too, but we can approximate here or refetch

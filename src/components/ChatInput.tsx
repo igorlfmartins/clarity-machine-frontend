@@ -1,19 +1,21 @@
-import { useRef, useEffect, type FormEvent, type KeyboardEvent } from 'react'
-import { Loader2, Send } from 'lucide-react'
+import { useRef, useEffect, useState, type FormEvent, type KeyboardEvent, type ChangeEvent } from 'react'
+import { Loader2, Send, Paperclip, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 interface ChatInputProps {
   input: string
   setInput: (value: string) => void
-  onSubmit: (e: FormEvent) => void
+  onSubmit: (e: FormEvent, file?: File | null) => void
   isLoading: boolean
 }
 
 export function ChatInput({ input, setInput, onSubmit, isLoading }: ChatInputProps) {
   const { t } = useTranslation()
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
-  const canSend = input.trim().length > 0 && !isLoading
+  const canSend = (input.trim().length > 0 || selectedFile !== null) && !isLoading
 
   useEffect(() => {
     const el = inputRef.current
@@ -29,15 +31,62 @@ export function ChatInput({ input, setInput, onSubmit, isLoading }: ChatInputPro
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
-      onSubmit(event as unknown as FormEvent)
+      handleSubmit(event as unknown as FormEvent)
+    }
+  }
+
+  function handleFileSelect(event: ChangeEvent<HTMLInputElement>) {
+    if (event.target.files && event.target.files.length > 0) {
+      setSelectedFile(event.target.files[0])
+    }
+  }
+
+  function handleRemoveFile() {
+    setSelectedFile(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    if (!canSend) return
+    onSubmit(e, selectedFile)
+    setSelectedFile(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
     }
   }
 
   return (
-    <form onSubmit={onSubmit} className="w-full space-y-4">
+    <form onSubmit={handleSubmit} className="w-full space-y-4">
+      {selectedFile && (
+        <div className="flex items-center gap-2 bg-bio-deep/5 dark:bg-bio-white/10 p-2 border-l-2 border-bio-teal dark:border-bio-lime">
+          <Paperclip className="h-4 w-4 text-bio-deep/60 dark:text-bio-white/60" />
+          <span className="text-xs font-mono text-bio-deep dark:text-bio-white truncate max-w-[200px]">
+            {selectedFile.name}
+          </span>
+          <button
+            type="button"
+            onClick={handleRemoveFile}
+            className="ml-auto text-bio-deep/40 hover:text-red-500 dark:text-bio-white/40 dark:hover:text-red-400"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
       <div className="flex flex-col md:flex-row items-stretch gap-4">
         <div className="flex-1 bg-white dark:bg-bio-white/5 border-2 border-bio-deep/10 dark:border-bio-white/20 p-4 relative group focus-within:border-bio-teal dark:focus-within:border-bio-lime transition-colors flex items-center">
           <div className="absolute top-0 left-0 w-1 h-4 bg-bio-teal dark:bg-bio-lime opacity-30" />
+          
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            className="hidden"
+            accept=".txt,.md,.csv,.json"
+          />
+
           <textarea
             id="chat-input"
             name="message"
@@ -53,6 +102,14 @@ export function ChatInput({ input, setInput, onSubmit, isLoading }: ChatInputPro
         </div>
 
         <div className="flex flex-wrap items-stretch gap-3">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="h-full w-10 sm:w-10 bg-bio-deep/10 dark:bg-bio-white/10 text-bio-deep dark:text-bio-white border border-bio-deep/20 dark:border-bio-white/20 hover:bg-bio-deep/20 dark:hover:bg-bio-white/20 transition-colors flex items-center justify-center"
+            title="Anexar arquivo de texto"
+          >
+            <Paperclip className="h-4 w-4" />
+          </button>
           <button
             type="submit"
             disabled={!canSend}

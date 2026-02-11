@@ -42,12 +42,12 @@ export function Chat() {
 
   const focusAreas = useMemo(() => FOCUS_AREAS(t), [t])
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent, file?: File | null) {
     e.preventDefault()
-    if (!input.trim() || isLoading) return
+    if ((!input.trim() && !file) || isLoading) return
     const msg = input
     setInput('')
-    await sendMessage(msg, selectedFocus)
+    await sendMessage(msg, selectedFocus, file)
   }
 
   function handleDeepDive(area: { id: string; label: string }) {

@@ -45,6 +45,7 @@ export async function sendConsultoriaMessage(params: {
   language?: string
   toneLevel?: number
   token?: string
+  file?: File | null
 }): Promise<ChatResponse> {
   const formattedHistory = (params.history || []).map(msg => ({
     role: msg.sender === 'user' ? 'user' : 'model',
@@ -52,7 +53,6 @@ export async function sendConsultoriaMessage(params: {
   }));
 
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
     'x-api-key': CLIENT_API_KEY,
   };
 
@@ -60,17 +60,34 @@ export async function sendConsultoriaMessage(params: {
     headers['Authorization'] = `Bearer ${params.token}`;
   }
 
-  const response = await fetch(CONSULTORIA_URL, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
+  let body: BodyInit;
+
+  if (params.file) {
+    const formData = new FormData();
+    formData.append('message', params.message);
+    if (params.conversationId) formData.append('conversationId', params.conversationId);
+    formData.append('history', JSON.stringify(formattedHistory));
+    if (params.focus) formData.append('focus', params.focus);
+    if (params.language) formData.append('language', params.language);
+    if (params.toneLevel) formData.append('toneLevel', params.toneLevel.toString());
+    formData.append('file', params.file);
+    body = formData;
+  } else {
+    headers['Content-Type'] = 'application/json';
+    body = JSON.stringify({
       message: params.message,
       conversationId: params.conversationId,
       history: formattedHistory,
       focus: params.focus || undefined,
       language: params.language,
       toneLevel: params.toneLevel,
-    }),
+    });
+  }
+
+  const response = await fetch(CONSULTORIA_URL, {
+    method: 'POST',
+    headers,
+    body,
   })
 
   if (!response.ok) {
