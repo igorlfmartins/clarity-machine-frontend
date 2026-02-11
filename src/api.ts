@@ -16,28 +16,7 @@ const API_BASE_URL = (() => {
 const CONSULTORIA_URL = `${API_BASE_URL}/consultoria`
 const CLIENT_API_KEY = import.meta.env.VITE_CLIENT_API_KEY || ''
 
-const extractErrorMessage = (value: unknown): string | null => {
-  if (!value) return null
-  if (typeof value === 'string') return value
-  if (typeof value === 'object') {
-    const record = value as Record<string, unknown>
-    if (typeof record.message === 'string') return record.message
-    const errors: string[] = []
-    if (Array.isArray(record._errors)) {
-      errors.push(...record._errors.filter((item): item is string => typeof item === 'string'))
-    }
-    for (const entry of Object.values(record)) {
-      if (entry && typeof entry === 'object') {
-        const entryRecord = entry as Record<string, unknown>
-        if (Array.isArray(entryRecord._errors)) {
-          errors.push(...entryRecord._errors.filter((item): item is string => typeof item === 'string'))
-        }
-      }
-    }
-    if (errors.length > 0) return errors.join(' ')
-  }
-  return null
-}
+
 
 export type SessionSummary = {
   id: string
