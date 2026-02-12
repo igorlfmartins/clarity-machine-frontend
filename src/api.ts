@@ -84,8 +84,13 @@ export async function sendConsultoriaMessage(params: {
 
   if (params.files && params.files.length > 0) {
     const formData = new FormData();
-    formData.append('message', params.message);
-    if (params.conversationId) formData.append('conversationId', params.conversationId);
+    // Ensure message is never undefined/null
+    formData.append('message', params.message || '');
+    
+    if (params.conversationId && params.conversationId !== 'null' && params.conversationId !== 'undefined') {
+      formData.append('conversationId', params.conversationId);
+    }
+    
     formData.append('history', JSON.stringify(formattedHistory));
     if (params.focus) formData.append('focus', params.focus);
     if (params.language) formData.append('language', params.language);
